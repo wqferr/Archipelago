@@ -33,7 +33,7 @@ class StartingPosition(Choice):
     option_very_dangerous = 3
 
 
-tloz_options: typing.Dict[str, type(Option)] = {
+tloz_options: typing.Dict[str, typing.Type[Option]] = {
     "ExpandedPool": ExpandedPool,
     "TriforceLocations": TriforceLocations,
     "StartingPosition": StartingPosition
