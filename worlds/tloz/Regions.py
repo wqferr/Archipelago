@@ -40,6 +40,7 @@ def create_regions(world: MultiWorld, player: int):
     arrow_shops = Region("Arrow Shops", player, world)
     candle_shops = Region("Candle Shops", player, world)
     medicine_shops = Region("Medicine Shops", player, world)
+    blue_ring_shop = Region("Blue Ring Shop", player, world)
     take_anys = Region("Take Anys", player, world)
     
     top_level_regions = [
@@ -53,6 +54,7 @@ def create_regions(world: MultiWorld, player: int):
         shield_shops,
         candle_shops,
         arrow_shops,
+        blue_ring_shop,
         medicine_shops,
         take_anys,
     ]
@@ -122,7 +124,6 @@ def create_regions(world: MultiWorld, player: int):
         # Lake
         "Level 1": levels[1],
         "White sword cave": new_region("White Sword Cave", 0x0a, 18),
-        "Lake blue ring shop": new_region("Lake Blue Ring Shop", 0x34, 32),
         
         # Lost Hills
         "Level 5": levels[5],
@@ -276,6 +277,12 @@ def create_regions(world: MultiWorld, player: int):
     for shop in medicine_shops_.values():
         _connect_unrestricted(medicine_shops, shop, f"Medicine Shops -> {shop.name}")
 
+    brs = new_region("Lake Blue Ring Shop", 0x34, 32)
+    blue_ring_shop_ = {
+        "Lake blue ring shop": brs
+    }
+
+    _connect_unrestricted(blue_ring_shop, brs, f"Blue Ring Shop -> {brs.name}")
 
     take_anys_ = {
         "Lake take any medicine/heart container": new_region("Lake Take Any", 0x47, 17, CaveRequirement.CANDLE),
@@ -298,8 +305,35 @@ def create_regions(world: MultiWorld, player: int):
         candle_shops.locations.append(f"Candle Shop Item {slot}")
         medicine_shops.locations.append(f"Medicine Shop Item {slot}")
         take_anys.locations.append(f"Take Any Item {slot}")
-        # TODO blue ring shop?
         
+    
+    overworld_mainland.locations.append("Armos Knights")
+    
+    all_caves = {
+        **mainland_readily_accessible_entrances,
+        **bombables,
+        **raft_islands,
+        **burnables,
+        **recorder_secrets,
+        **power_bracelet_secrets,
+        **shield_shops_,
+        **arrow_shops_,
+        **candle_shops_,
+        **medicine_shops_,
+        **blue_ring_shop_,
+        **take_anys,
+    }
+    
+    world.regions += all_caves.values()
+    
+    # original: typing.List[Cave] = list(all_caves.values())
+    # shuffled: typing.List[Cave] = list(original)
+    # world.random.shuffle(shuffled)
+    # cave_mapping = {}
+    
+    # for old_location, new_location in zip(original, shuffled):
+    #     cave_mapping[old_location.screen] = (new_location.cave_code, old_location.requirement)
+    
     
     
 def _connect_restricted(
