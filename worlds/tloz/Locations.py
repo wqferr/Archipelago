@@ -1,15 +1,19 @@
 from . import Rom
+from .Regions import RegionNames
 
 major_locations = [
-    "Starting Sword Cave",
-    "White Sword Pond",
-    "Magical Sword Grave",
+    ("Starting Sword Cave", RegionNames.START_SWORD_CAVE),
+    ("White Sword Pond", RegionNames.WHITE_SWORD_CAVE),
+    ("Magical Sword Grave", RegionNames.MAGICAL_SWORD_CAVE),
+    ("Armos Knights", RegionNames.OVERWORLD_MAINLAND),
+    ("Ocean Heart Container", RegionNames.STEPLADDER_DOCK),
+    ("Letter Cave", RegionNames.OVERWORLD_MAINLAND),
+]
+
+take_any_locations = [
     "Take Any Item Left",
     "Take Any Item Middle",
     "Take Any Item Right",
-    "Armos Knights",
-    "Ocean Heart Container",
-    "Letter Cave",
 ]
 
 level_locations = [
@@ -92,11 +96,11 @@ all_level_locations = [location for level in level_locations for location in lev
 standard_level_locations = [location for level in level_locations for location in level if "Drop" not in location]
 
 shop_locations = [
-    "Arrow Shop Item Left", "Arrow Shop Item Middle", "Arrow Shop Item Right",
-    "Candle Shop Item Left", "Candle Shop Item Middle", "Candle Shop Item Right",
-    "Blue Ring Shop Item Left", "Blue Ring Shop Item Middle", "Blue Ring Shop Item Right",
-    "Shield Shop Item Left", "Shield Shop Item Middle", "Shield Shop Item Right",
-    "Potion Shop Item Left", "Potion Shop Item Middle", "Potion Shop Item Right"
+    (("Arrow Shop Item Left", "Arrow Shop Item Middle", "Arrow Shop Item Right"), RegionNames.ARROW_SHOPS),
+    (("Candle Shop Item Left", "Candle Shop Item Middle", "Candle Shop Item Right"), RegionNames.CANDLE_SHOPS),
+    (("Blue Ring Shop Item Left", "Blue Ring Shop Item Middle", "Blue Ring Shop Item Right"), RegionNames.BLUE_RING_SHOP),
+    (("Shield Shop Item Left", "Shield Shop Item Middle", "Shield Shop Item Right"), RegionNames.SHIELD_SHOPS),
+    (("Potion Shop Item Left", "Potion Shop Item Middle", "Potion Shop Item Right"), RegionNames.MEDICINE_SHOPS)
 ]
 
 food_locations = [
@@ -333,9 +337,9 @@ underworld2_locations = [*floor_location_game_offsets_late.keys()]
 
 #cave_locations = ["Take Any Item Left", "Take Any Item Middle", "Take Any Item Right"] + [*shop_locations]
 
-location_table_base = [x for x in major_locations] + \
+location_table_base = [x[0] for x in major_locations] + \
                       [y for y in all_level_locations] + \
-                      [z for z in shop_locations]
+                      [w for z in shop_locations for w in z[0]]
 location_table = {}
 for i, location in enumerate(location_table_base):
     location_table[location] = i

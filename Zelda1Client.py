@@ -62,12 +62,12 @@ class ZeldaContext(CommonContext):
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
         self.bonus_items = []
-        self.nes_streams: (StreamReader, StreamWriter) = None
+        self.nes_streams: typing.Tuple[StreamReader, StreamWriter] = None
         self.nes_sync_task = None
         self.messages = {}
         self.locations_array = None
         self.nes_status = CONNECTION_INITIAL_STATUS
-        self.game = 'The Legend of Zelda'
+        self.game = "The Legend of Zelda"
         self.awaiting_rom = False
         self.shop_slots_left = 0
         self.shop_slots_middle = 0
@@ -193,6 +193,7 @@ async def parse_locations(locations_array, ctx: ZeldaContext, force: bool, zone=
         for location in ctx.missing_locations:
             location_name = lookup_any_location_id_to_name[location]
 
+            # TODO fix this
             if location_name in Locations.overworld_locations and zone == "overworld":
                 status = locations_array[Locations.major_location_offsets[location_name]]
                 if location_name == "Ocean Heart Container":

@@ -10,7 +10,9 @@ from BaseClasses import Item, Location, Region, Entrance, MultiWorld, ItemClassi
 from .ItemPool import generate_itempool, starting_weapons, dangerous_weapon_locations
 from .Items import item_table, item_prices, item_game_ids
 from .Locations import location_table, level_locations, major_locations, shop_locations, all_level_locations, \
-    standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations
+    standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations, \
+    take_any_locations
+from .Regions import create_regions, connect_regions, RegionNames
 from .Options import tloz_options
 from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, first_quest_dungeon_items_late
 from .Rules import set_rules
@@ -94,51 +96,59 @@ class TLoZWorld(World):
         return return_location
 
     def create_regions(self):
-        menu = Region("Menu", self.player, self.multiworld)
-        overworld = Region("Overworld", self.player, self.multiworld)
-        self.levels = [None]  # Yes I'm making a one-indexed array in a zero-indexed language. I hate me too.
-        for i in range(1, 10):
-            level = Region(f"Level {i}", self.player, self.multiworld)
-            self.levels.append(level)
-            new_entrance = Entrance(self.player, f"Level {i}", overworld)
-            new_entrance.connect(level)
-            overworld.exits.append(new_entrance)
-            self.multiworld.regions.append(level)
-
-        for i, level in enumerate(level_locations):
-            for location in level:
-                if self.multiworld.ExpandedPool[self.player] or "Drop" not in location:
-                    self.levels[i + 1].locations.append(
-                        self.create_location(location, self.location_name_to_id[location], self.levels[i + 1]))
-
-        for level in range(1, 9):
-            boss_event = self.create_location(f"Level {level} Boss Status", None,
-                                              self.multiworld.get_region(f"Level {level}", self.player),
-                                              True)
-            boss_event.show_in_spoiler = False
-            self.levels[level].locations.append(boss_event)
-
-        for location in major_locations:
-            if self.multiworld.ExpandedPool[self.player] or "Take Any" not in location:
-                overworld.locations.append(
-                    self.create_location(location, self.location_name_to_id[location], overworld))
-
-        for location in shop_locations:
-            overworld.locations.append(
-                self.create_location(location, self.location_name_to_id[location], overworld))
-
+        create_regions(self.multiworld, self.player)
         ganon = self.create_location("Ganon", None, self.multiworld.get_region("Level 9", self.player))
         zelda = self.create_location("Zelda", None, self.multiworld.get_region("Level 9", self.player))
         ganon.show_in_spoiler = False
         zelda.show_in_spoiler = False
         self.levels[9].locations.append(ganon)
         self.levels[9].locations.append(zelda)
-        begin_game = Entrance(self.player, "Begin Game", menu)
-        menu.exits.append(begin_game)
-        begin_game.connect(overworld)
-        self.multiworld.regions.append(menu)
-        self.multiworld.regions.append(overworld)
+        
+        overworld_mainland = self.multiworld.get_region(RegionNames.OVERWORLD_MAINLAND, self.player)
+        self.levels = [None]  # Yes I'm making a one-indexed array in a zero-indexed language. I hate me too.
+        for i, level in enumerate(level_locations):
+            for location in level:
+                if self.multiworld.ExpandedPool[self.player] or "Drop" not in location:
+                    self.levels[i + 1].locations.append(
+                        self.create_location(
+                            location, self.location_name_to_id[location], self.levels[i + 1]
+                        )
+                    )
 
+        for level in range(1, 9):
+            boss_event = self.create_location(
+                f"Level {level} Boss Status",
+                None,
+                self.multiworld.get_region(RegionNames.LEVELS[level], self.player),
+                True
+            )
+            boss_event.show_in_spoiler = False
+            self.levels[level].locations.append(boss_event)
+
+        for (location_name, region_name) in major_locations:
+            region = self.multiworld.get_region(region_name)
+            location = self.create_location(
+                location_name, self.location_name_to_id[location_name], region
+            )
+            region.locations.append(location)
+                
+        if self.multiworld.ExpandedPool[self.player]:
+            take_any_region = self.multiworld.get_region(RegionNames.TAKE_ANYS, self.player)
+            for location_name in take_any_locations:
+                take_any_region.locations.append(
+                    self.create_location(
+                        location_name, self.location_name_to_id[location_name], take_any_region
+                    )
+                )
+
+        for (shop_slots, shop_name) in shop_locations:
+            shop_region = self.multiworld.get_region(shop_name)
+            for slot_name in shop_slots:
+                shop_region.locations.append(
+                    self.create_location(
+                        slot_name, self.location_name_to_id[slot_name], shop_region
+                    )
+                )
 
     def create_items(self):
         # refer to ItemPool.py
