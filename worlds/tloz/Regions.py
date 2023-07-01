@@ -484,43 +484,45 @@ def connect_regions(world: MultiWorld, player: int):
         if (group_name, metadata.entrance_type) in mapped_entrances:
             continue
 
+        group_region = world.get_region(group_name, player)
+
         mapped_entrances.add((group_name, metadata.entrance_type))
         if metadata.entrance_type == CaveRequirement.NONE:
             _connect_unrestricted(
-                overworld_mainland, cave_region, f"Enter {cave_name}", f"Exit {cave_name}"
+                overworld_mainland, group_region, f"Enter {group_name}", f"Exit {group_name}"
             )
         elif metadata.entrance_type == CaveRequirement.BOMBS:
             _connect_unrestricted(
-                bombables, cave_region, f"Blow Up Entrance to {cave_name}", f"Exit {cave_name}"
+                bombables, group_region, f"Blow Up Entrance to {group_name}", f"Exit {group_name}"
             )
         elif metadata.entrance_type == CaveRequirement.CANDLE:
             _connect_unrestricted(
-                burnables, cave_region, f"Burn Entrance to {cave_name}", f"Exit {cave_name}"
+                burnables, group_region, f"Burn Entrance to {group_name}", f"Exit {group_name}"
             )
         elif metadata.entrance_type == CaveRequirement.RAFT:
-            _connect_unrestricted(raft_islands, cave_region, f"Raft to {cave_name}")
+            _connect_unrestricted(raft_islands, group_region, f"Raft to {group_name}")
         elif metadata.entrance_type == CaveRequirement.RECORDER:
             _connect_unrestricted(
                 recorder_secrets,
-                cave_region,
-                f"Play a Tune to Enter {cave_name}",
-                f"Exit {cave_name}"
+                group_region,
+                f"Play a Tune to Enter {group_name}",
+                f"Exit {group_name}"
             )
         elif metadata.entrance_type == CaveRequirement.BRACELET:
             _connect_unrestricted(
                 bracelet_secrets,
-                cave_region,
-                f"Push a Rock and Enter {cave_name}",
-                f"Exit {cave_name}"
+                group_region,
+                f"Push a Rock and Enter {group_name}",
+                f"Exit {group_name}"
             )
     
-    for level_name in RegionNames.LEVELS.values():
+    for i, level_name in RegionNames.LEVELS.items():
         level = world.get_region(level_name, player)
         _connect_restricted(
             overworld_mainland,
             level,
             lambda state: state.has("Recorder", player),
-            "Warp to"
+            f"Warp to Level {i}"
         )
     
 

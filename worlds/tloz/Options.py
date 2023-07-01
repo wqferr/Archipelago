@@ -54,5 +54,6 @@ tloz_options: typing.Dict[str, typing.Type[BaseOption]] = {
     "ExpandedPool": ExpandedPool,
     "TriforceLocations": TriforceLocations,
     "StartingPosition": StartingPosition,
-    "ShuffleCaves": ShuffleCaves
+    "ShuffleCaves": ShuffleCaves,
+    "RandomStartingWeapon": RandomStartingWeapon,
 }

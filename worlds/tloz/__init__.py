@@ -92,13 +92,13 @@ class TLoZWorld(World):
     def create_event(self, event: str):
         return TLoZItem(event, ItemClassification.progression, None, self.player)
 
-    def create_location(self, name, id, parent, event=False):
+    def create_location(self, name: str, id: int, parent: Region, event: bool =False):
         return_location = TLoZLocation(self.player, name, id, parent)
         return_location.event = event
         parent.locations.append(return_location)
         return return_location
     
-    def should_shuffle_this_cave(self, cave_name):
+    def should_shuffle_this_cave(self, cave_name: str):
         return cave_name != RegionNames.START_SWORD_CAVE \
             or self.multiworld.StartingPosition[self.player] != "safe"
 
@@ -121,14 +121,14 @@ class TLoZWorld(World):
         connect_regions(self.multiworld, self.player)
 
         self.levels = [None]  # Yes I'm making a one-indexed array in a zero-indexed language. I hate me too.
-        for i, level in enumerate(level_locations):
-            for location in level:
+        for i, loc_list in enumerate(level_locations):
+            level = self.multiworld.get_region(RegionNames.LEVELS[i+1], self.player)
+            for location in loc_list:
                 if self.multiworld.ExpandedPool[self.player] or "Drop" not in location:
-                    level = self.multiworld.get_region(RegionNames.LEVELS[i+1], self.player)
                     self.create_location(
                         location, self.location_name_to_id[location], level
                     )
-                    self.levels.append(level)
+            self.levels.append(level)
 
         ganon = self.create_location("Ganon", None, self.levels[9])
         zelda = self.create_location("Zelda", None, self.levels[9])
@@ -214,7 +214,7 @@ class TLoZWorld(World):
             # if item & 0b00011111 == 0b00000011:
             #     rom_data[first_quest_dungeon_items_late + i] = item | 0b00111111
         for cave_name in all_cave_names:
-            cave: Cave = self.multiworld.get_region(cave_name)
+            cave: Cave = self.multiworld.get_region(cave_name, self.player)
             screen_code = cave.metadata.screen_code
             cave_code = cave.cave_code
             screen_byte = rom_data[cave_per_screen + screen_code]
