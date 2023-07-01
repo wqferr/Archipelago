@@ -12,8 +12,8 @@ from .ItemPool import generate_itempool, starting_weapons, dangerous_weapon_loca
 from .Items import item_table, item_prices, item_game_ids
 from .Locations import location_table, level_locations, major_locations, shop_locations, all_level_locations, \
     standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations, \
-    take_any_locations, shop_slots
-from .Regions import create_regions, connect_regions, RegionNames, Cave, all_cave_names
+    take_any_locations, shop_slots, major_location_offsets
+from .Regions import create_regions, connect_regions, RegionNames, Cave, all_cave_names, CaveMetadata
 from .Options import tloz_options
 from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, \
     first_quest_dungeon_items_late, cave_per_screen
@@ -108,11 +108,14 @@ class TLoZWorld(World):
             for name in all_cave_names
             if self.should_shuffle_this_cave(name)
         ]
-        shuffled_caves_metadata = [cave.metadata for cave in shufflable_caves_in_order]
+        shuffled_caves_metadata: typing.List[CaveMetadata] = [cave.metadata for cave in shufflable_caves_in_order]
         self.multiworld.random.shuffle(shuffled_caves_metadata)
 
         for cave, metadata in zip(shufflable_caves_in_order, shuffled_caves_metadata):
             cave.metadata = metadata
+            if cave.name in major_location_offsets:
+                major_location_offsets[cave.name] = metadata.screen_code
+                print(cave.name, hex(metadata.screen_code))
     
     def create_regions(self):
         create_regions(self.multiworld, self.player)

@@ -311,11 +311,23 @@ major_location_ids = {
     "Ocean Heart Container": 0x1789A
 }
 
+# major_location_offsets = {
+#     "Starting Sword Cave": 0x77,
+#     "White Sword Pond": 0x0A,
+#     "Magical Sword Grave": 0x21,
+#     "Letter Cave": 0x0E,
+#     # "Take Any Item Left": 0x7B,
+#     # "Take Any Item Middle": 0x2C,
+#     # "Take Any Item Right": 0x47,
+#     "Armos Knights": 0x24,
+#     "Ocean Heart Container": 0x5F
+# }
+
 major_location_offsets = {
-    "Starting Sword Cave": 0x77,
-    "White Sword Pond": 0x0A,
-    "Magical Sword Grave": 0x21,
-    "Letter Cave": 0x0E,
+    RegionNames.START_SWORD_CAVE: 0x77,
+    RegionNames.WHITE_SWORD_CAVE: 0x0A,
+    RegionNames.MAGICAL_SWORD_CAVE: 0x21,
+    RegionNames.LETTER_CAVE: 0x0E,
     # "Take Any Item Left": 0x7B,
     # "Take Any Item Middle": 0x2C,
     # "Take Any Item Right": 0x47,
