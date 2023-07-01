@@ -1,5 +1,5 @@
 from . import Rom
-from .Regions import RegionNames
+from .Names import RegionNames
 
 major_locations = [
     ("Starting Sword Cave", RegionNames.START_SWORD_CAVE),
@@ -13,7 +13,7 @@ major_locations = [
 take_any_locations = [
     "Take Any Item Left",
     "Take Any Item Middle",
-    "Take Any Item Right",
+    "Take Any Item Right"
 ]
 
 level_locations = [
@@ -102,6 +102,7 @@ shop_locations = [
     (("Shield Shop Item Left", "Shield Shop Item Middle", "Shield Shop Item Right"), RegionNames.SHIELD_SHOPS),
     (("Potion Shop Item Left", "Potion Shop Item Middle", "Potion Shop Item Right"), RegionNames.MEDICINE_SHOPS)
 ]
+shop_slots = [slot for entry in shop_locations for slot in entry[0]]
 
 food_locations = [
     "Level 7 Map", "Level 7 Boss", "Level 7 Triforce", "Level 7 Key Drop (Goriyas)",
@@ -338,7 +339,7 @@ underworld2_locations = [*floor_location_game_offsets_late.keys()]
 #cave_locations = ["Take Any Item Left", "Take Any Item Middle", "Take Any Item Right"] + [*shop_locations]
 
 location_table_base = [x[0] for x in major_locations] + \
-                      [y for y in all_level_locations] + \
+                      [y for y in all_level_locations + take_any_locations] + \
                       [w for z in shop_locations for w in z[0]]
 location_table = {}
 for i, location in enumerate(location_table_base):

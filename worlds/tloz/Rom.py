@@ -40,6 +40,7 @@ magical_boomerang = 0x0675
 magical_shield = 0x0676
 rupees_to_add = 0x067D
 
+cave_per_screen = 0x18490
 
 
 

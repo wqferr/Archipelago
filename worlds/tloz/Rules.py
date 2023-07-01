@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from worlds.generic.Rules import add_rule
-from .Locations import food_locations, shop_locations
+from .Locations import food_locations, shop_slots
 from .ItemPool import dangerous_weapon_locations
 from .Options import StartingPosition
 
@@ -39,7 +39,7 @@ def set_rules(tloz_world: "TLoZWorld"):
                          lambda state: state.has_group("swords", player) or state.has("Bow", player))
 
     # No requiring anything in a shop until we can farm for money
-    for location in shop_locations:
+    for location in shop_slots:
         add_rule(world.get_location(location, player),
                  lambda state: state.has_group("weapons", player))
 

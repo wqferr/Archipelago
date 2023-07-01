@@ -12,10 +12,11 @@ from .ItemPool import generate_itempool, starting_weapons, dangerous_weapon_loca
 from .Items import item_table, item_prices, item_game_ids
 from .Locations import location_table, level_locations, major_locations, shop_locations, all_level_locations, \
     standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations, \
-    take_any_locations
+    take_any_locations, shop_slots
 from .Regions import create_regions, connect_regions, RegionNames, Cave, all_cave_names
 from .Options import tloz_options
-from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, first_quest_dungeon_items_late
+from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, \
+    first_quest_dungeon_items_late, cave_per_screen
 from .Rules import set_rules
 from worlds.AutoWorld import World, WebWorld
 from worlds.generic.Rules import add_rule
@@ -99,11 +100,11 @@ class TLoZWorld(World):
     
     def should_shuffle_this_cave(self, cave_name):
         return cave_name != RegionNames.START_SWORD_CAVE \
-            or self.StartingPosition[self.player] != "safe"
+            or self.multiworld.StartingPosition[self.player] != "safe"
 
     def shuffle_caves(self):
         shufflable_caves_in_order = [
-            self.multiworld.get_region(name)
+            self.multiworld.get_region(name, self.player)
             for name in all_cave_names
             if self.should_shuffle_this_cave(name)
         ]
@@ -118,12 +119,12 @@ class TLoZWorld(World):
         if self.multiworld.ShuffleCaves[self.player]:
             self.shuffle_caves()
         connect_regions(self.multiworld, self.player)
-        
+
         self.levels = [None]  # Yes I'm making a one-indexed array in a zero-indexed language. I hate me too.
         for i, level in enumerate(level_locations):
             for location in level:
                 if self.multiworld.ExpandedPool[self.player] or "Drop" not in location:
-                    level = self.multiworld.get_region(RegionNames.LEVELS[i+1])
+                    level = self.multiworld.get_region(RegionNames.LEVELS[i+1], self.player)
                     self.create_location(
                         location, self.location_name_to_id[location], level
                     )
@@ -143,8 +144,9 @@ class TLoZWorld(World):
             )
             boss_event.show_in_spoiler = False
 
+
         for (location_name, region_name) in major_locations:
-            region = self.multiworld.get_region(region_name)
+            region = self.multiworld.get_region(region_name, self.player)
             self.create_location(
                 location_name, self.location_name_to_id[location_name], region
             )
@@ -157,7 +159,7 @@ class TLoZWorld(World):
                 )
 
         for (shop_slots, shop_name) in shop_locations:
-            shop_region = self.multiworld.get_region(shop_name)
+            shop_region = self.multiworld.get_region(shop_name, self.player)
             for slot_name in shop_slots:
                 self.create_location(
                     slot_name, self.location_name_to_id[slot_name], shop_region
@@ -198,22 +200,41 @@ class TLoZWorld(World):
         for i in range(0, 0x7F):
             item = rom_data[first_quest_dungeon_items_early + i]
             if item & 0b00100000:
-                rom_data[first_quest_dungeon_items_early + i] = item & 0b11011111
-                rom_data[first_quest_dungeon_items_early + i] = item | 0b01000000
-            if item & 0b00011111 == 0b00000011: # Change all Item 03s to Item 3F, the proper "nothing"
-                rom_data[first_quest_dungeon_items_early + i] = item | 0b00111111
+                rom_data[first_quest_dungeon_items_early + i] = item & 0b10011111
+                rom_data[first_quest_dungeon_items_early + i] |= 0b01000000
+            # This is now done in base patch
+            # if item & 0b00011111 == 0b00000011: # Change all Item 03s to Item 3F, the proper "nothing"
+            #     rom_data[first_quest_dungeon_items_early + i] = item | 0b00111111
 
             item = rom_data[first_quest_dungeon_items_late + i]
             if item & 0b00100000:
-                rom_data[first_quest_dungeon_items_late + i] = item & 0b11011111
-                rom_data[first_quest_dungeon_items_late + i] = item | 0b01000000
-            if item & 0b00011111 == 0b00000011:
-                rom_data[first_quest_dungeon_items_late + i] = item | 0b00111111
+                rom_data[first_quest_dungeon_items_late + i] = item & 0b10011111
+                rom_data[first_quest_dungeon_items_late + i] |= 0b01000000
+            # This is now done in base patch
+            # if item & 0b00011111 == 0b00000011:
+            #     rom_data[first_quest_dungeon_items_late + i] = item | 0b00111111
+        for cave_name in all_cave_names:
+            cave: Cave = self.multiworld.get_region(cave_name)
+            screen_code = cave.metadata.screen_code
+            cave_code = cave.cave_code
+            screen_byte = rom_data[cave_per_screen + screen_code]
+            screen_byte &= 0b00000011
+            screen_byte |= cave_code << 2
+            rom_data[cave_per_screen + screen_code] = screen_byte
+
         return rom_data
+    
+    def apply_cave_shuffle_patch(self, rom_data: bytearray):
+        for cave_name in all_cave_names:
+            cave: Cave = self.multiworld.get_region(cave_name)
+            screen_code = cave.metadata.screen_code
+            cave_bitmask = 0b11111100
+            rom_data[cave_per_screen + screen_code] = (cave.cave_code & cave_bitmask) | (cave.cave_code & ~cave_bitmask)
 
     def apply_randomizer(self):
         with open(get_base_rom_path(), 'rb') as rom:
             rom_data = self.apply_base_patch(rom)
+
         # Write each location's new data in
         for location in self.multiworld.get_filled_locations(self.player):
             # Zelda and Ganon aren't real locations
@@ -233,7 +254,7 @@ class TLoZWorld(World):
             location_id = location_ids[location.name]
         
             # Shop prices need to be set
-            if location.name in shop_locations:
+            if location.name in shop_slots:
                 if location.name[-5:] == "Right":
                     # Final item in stores has bit 6 and 7 set. It's what marks the cave a shop.
                     item_id = item_id | 0b11000000

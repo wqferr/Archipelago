@@ -1,5 +1,5 @@
 from BaseClasses import ItemClassification
-from .Locations import level_locations, all_level_locations, standard_level_locations, shop_locations
+from .Locations import level_locations, all_level_locations, standard_level_locations, shop_slots
 from .Options import TriforceLocations, StartingPosition
 
 # Swords are in starting_weapons
@@ -87,7 +87,7 @@ def get_pool_core(world):
     minor_items = dict(minor_dungeon_items)
 
     # Guaranteed Shop Items
-    reserved_store_slots = random.sample(shop_locations[0:9], 4)
+    reserved_store_slots = random.sample(shop_slots[0:9], 4)
     for location, item in zip(reserved_store_slots, guaranteed_shop_items):
         placed_items[location] = item
 
