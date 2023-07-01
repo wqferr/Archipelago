@@ -1,5 +1,5 @@
 import typing
-from Options import Option as BaseOption, DefaultOnToggle, Choice
+from Options import Option as BaseOption, Toggle, DefaultOnToggle, Choice
 
 
 class ExpandedPool(DefaultOnToggle):
@@ -31,18 +31,23 @@ class StartingPosition(Choice):
     option_unsafe = 1
     option_dangerous = 2
     option_very_dangerous = 3
-    
+
+class RandomStartingWeapon(Toggle):
+    """If the starting weapon should be chosen at random.
+    "false" means starting weapon will always be the Sword.
+    "true" means starting weapon will be any of the Swords, Red Candle, or Magical Rod
+    """
+    display_name = "Random Starting Weapon"
+
 class ShuffleCaves(DefaultOnToggle):
     """Whether to shuffle cave entrances.
-    "Off" means all caves are in their vanilla locations.
-    "On" means all caves, including the starting sword cave, are randomized.
+    "false" means all caves are in their vanilla locations.
+    "true" means all caves, including the starting sword cave, are randomized.
     
     When "on" is selected with "safe" starting position, all caves but the Starting Sword Cave
     are randomized.
     """
     display_name = "Shuffle Caves"
-    option_off = 0
-    option_on = 1
 
 
 tloz_options: typing.Dict[str, typing.Type[BaseOption]] = {

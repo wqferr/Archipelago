@@ -72,10 +72,11 @@ dangerous_weapon_locations = [
 
 def generate_itempool(tlozworld):
     (pool, placed_items) = get_pool_core(tlozworld)
-    tlozworld.multiworld.itempool.extend([tlozworld.multiworld.create_item(item, tlozworld.player) for item in pool])
+    spawn = lambda item: tlozworld.multiworld.create_item(item, tlozworld.player)
+    tlozworld.multiworld.itempool.extend(spawn(item) for item in pool)
     for (location_name, item) in placed_items.items():
         location = tlozworld.multiworld.get_location(location_name, tlozworld.player)
-        location.place_locked_item(tlozworld.multiworld.create_item(item, tlozworld.player))
+        location.place_locked_item(spawn(item))
         if item == "Bomb":
             location.item.classification = ItemClassification.progression
 
@@ -93,7 +94,10 @@ def get_pool_core(world):
 
     # Starting Weapon
     start_weapon_locations = starting_weapon_locations.copy()
-    starting_weapon = random.choice(starting_weapons)
+    if world.multiworld.RandomStartingWeapon[world.player]:
+        starting_weapon = random.choice(starting_weapons)
+    else:
+        starting_weapon = "Sword"
     if world.multiworld.StartingPosition[world.player] == StartingPosition.option_safe:
         placed_items[start_weapon_locations[0]] = starting_weapon
     elif world.multiworld.StartingPosition[world.player] in \
