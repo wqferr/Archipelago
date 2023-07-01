@@ -102,8 +102,6 @@ class TLoZWorld(World):
             or self.StartingPosition[self.player] != "safe"
 
     def shuffle_caves(self):
-        shuffled_caves = list(all_cave_names)
-        self.multiworld.random.shuffle(shuffled_caves)
         shufflable_caves_in_order = [
             self.multiworld.get_region(name)
             for name in all_cave_names
