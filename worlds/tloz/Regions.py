@@ -3,7 +3,7 @@ import typing
 from .Locations import level_locations
 from BaseClasses import Entrance, Region, Location, MultiWorld, CollectionState
 from enum import Enum
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 class CaveRequirement(Enum):
     NONE = 0,
@@ -142,6 +142,136 @@ class RegionNames:
     START_TAKE_ANY_ROAD = "Start Take Any Road You Want"
     START_CANDLE_SHOP = "Start Candle Shop"
     START_MEDICINE_SHOP = "Start Medicine Shop"
+
+all_cave_names = [
+    # Levels
+    RegionNames.LEVEL_1,
+    RegionNames.LEVEL_2,
+    RegionNames.LEVEL_3,
+    RegionNames.LEVEL_4,
+    RegionNames.LEVEL_5,
+    RegionNames.LEVEL_6,
+    RegionNames.LEVEL_7,
+    RegionNames.LEVEL_8,
+    RegionNames.LEVEL_9,
+
+    # Lake
+    RegionNames.WHITE_SWORD_CAVE,
+    RegionNames.BLUE_RING_SHOP,
+    RegionNames.LAKE_DOOR_REPAIRS,
+    RegionNames.LAKE_SECRET_SMALL,
+    RegionNames.LAKE_SHIELD_SHOP_A,
+    RegionNames.LAKE_SHIELD_SHOP_B,
+    RegionNames.LAKE_ARROW_SHOP,
+    RegionNames.LAKE_TAKE_ANY,
+
+    # Lost Hills
+    RegionNames.LH_HINT_CAVE,
+    RegionNames.LH_TAKE_ANY_ROAD,
+    RegionNames.LH_CANDLE_SHOP,
+    RegionNames.LH_MEDICINE_SHOP,
+
+    # Coast
+    RegionNames.LETTER_CAVE,
+    RegionNames.COAST_DOOR_REPAIRS_A,
+    RegionNames.COAST_DOOR_REPAIRS_B,
+    RegionNames.COAST_SECRET_MEDIUM,
+    RegionNames.COAST_SECRET_LARGE,
+    RegionNames.COAST_MONEY_GAME_A,
+    RegionNames.COAST_MONEY_GAME_B,
+    RegionNames.COAST_ARROW_SHOP,
+    RegionNames.COAST_TAKE_ANY_A,
+    RegionNames.COAST_TAKE_ANY_B,
+
+    # River
+    RegionNames.RIVER_HINT_CAVE,
+    RegionNames.RIVER_PAY_HINT_CAVE,
+    RegionNames.RIVER_MEDICINE_SHOP,
+
+    # Graveyard
+    RegionNames.MAGICAL_SWORD_CAVE,
+    RegionNames.GRAVEYARD_TAKE_ANY_ROAD,
+    RegionNames.GRAVEYARD_ARROW_SHOP,
+    RegionNames.GRAVEYARD_MEDICINE_SHOP,
+
+    # Desert
+    RegionNames.DESERT_SECRET_MEDIUM,
+    RegionNames.DESERT_TAKE_ANY_ROAD,
+    RegionNames.DESERT_ARROW_SHOP,
+    RegionNames.DESERT_MEDICINE_SHOP,
+    RegionNames.DESERT_TAKE_ANY,
+
+    # Forest
+    RegionNames.FOREST_SECRET_SMALL_A,
+    RegionNames.FOREST_SECRET_SMALL_B,
+    RegionNames.FOREST_SECRET_MEDIUM,
+    RegionNames.FOREST_SECRET_LARGE,
+    RegionNames.FOREST_SHIELD_SHOP,
+    RegionNames.FOREST_CANDLE_SHOP,
+
+    # Death Mountain
+    RegionNames.DM_DOOR_REPAIRS_A,
+    RegionNames.DM_DOOR_REPAIRS_B,
+    RegionNames.DM_DOOR_REPAIRS_C,
+    RegionNames.DM_DOOR_REPAIRS_D,
+    RegionNames.DM_MONEY_GAME_A,
+    RegionNames.DM_MONEY_GAME_B,
+    RegionNames.DM_SECRET_MEDIUM,
+    RegionNames.DM_SHIELD_SHOP,
+    RegionNames.DM_MEDICINE_SHOP,
+
+    # Dead Woods
+    RegionNames.DW_PAY_HINT_CAVE,
+    RegionNames.DW_DOOR_REPAIRS,
+    RegionNames.DW_SECRET_SMALL,
+    RegionNames.DW_SECRET_MEDIUM,
+    RegionNames.DW_SECRET_LARGE,
+
+    # Start
+    RegionNames.START_SWORD_CAVE,
+    RegionNames.START_DOOR_REPAIRS,
+    RegionNames.START_MONEY_GAME,
+    RegionNames.START_SECRET_MEDIUM,
+    RegionNames.START_TAKE_ANY_ROAD,
+    RegionNames.START_CANDLE_SHOP,
+    RegionNames.START_MEDICINE_SHOP,
+]
+
+all_shield_shop_names = [
+    RegionNames.LAKE_SHIELD_SHOP_A,
+    RegionNames.LAKE_SHIELD_SHOP_B,
+    RegionNames.FOREST_SHIELD_SHOP,
+    RegionNames.DM_SHIELD_SHOP,
+]
+
+all_arrow_shop_names = [
+    RegionNames.LAKE_ARROW_SHOP,
+    RegionNames.COAST_ARROW_SHOP,
+    RegionNames.GRAVEYARD_ARROW_SHOP,
+    RegionNames.DESERT_ARROW_SHOP,
+]
+
+all_candle_shop_names = [
+    RegionNames.LH_CANDLE_SHOP,
+    RegionNames.FOREST_CANDLE_SHOP,
+    RegionNames.START_CANDLE_SHOP,
+]
+
+all_medicine_shop_names = [
+    RegionNames.LH_MEDICINE_SHOP,
+    RegionNames.RIVER_MEDICINE_SHOP,
+    RegionNames.GRAVEYARD_MEDICINE_SHOP,
+    RegionNames.DESERT_MEDICINE_SHOP,
+    RegionNames.DM_MEDICINE_SHOP,
+    RegionNames.START_MEDICINE_SHOP,
+]
+
+all_take_any_names = [
+    RegionNames.LAKE_TAKE_ANY,
+    RegionNames.COAST_TAKE_ANY_A,
+    RegionNames.COAST_TAKE_ANY_B,
+    RegionNames.DESERT_TAKE_ANY,
+]
 
 def create_regions(world: MultiWorld, player: int):
     main_menu = Region(RegionNames.MAIN_MENU, player, world)
@@ -443,20 +573,12 @@ def create_regions(world: MultiWorld, player: int):
 
     world.regions += all_caves
 
-    # original: typing.List[Cave] = list(all_caves.values())
-    # shuffled: typing.List[Cave] = list(original)
-    # world.random.shuffle(shuffled)
-    # cave_mapping = {}
 
-    # for old_location, new_location in zip(original, shuffled):
-    #     cave_mapping[old_location.screen] = (new_location.cave_code, old_location.requirement)
-
-# SHUFFLE BEFORE CALLING THIS
-# set metadata field accordingly
-def connect_regions(
-        world: MultiWorld,
-        player: int,
-        cave_names: typing.List[str]):
+def connect_regions(world: MultiWorld, player: int):
+    """Connects caves to their respective regions based on their metadata.
+    
+    If shuffling is desired, change the cave metadata before calling this.
+    """
     overworld_mainland = world.get_region(RegionNames.OVERWORLD_MAINLAND, player)
     bombables = world.get_region(RegionNames.BOMBABLES, player)
     burnables = world.get_region(RegionNames.BURNABLES, player)
@@ -464,9 +586,26 @@ def connect_regions(
     recorder_secrets = world.get_region(RegionNames.RECORDER_SECRETS, player)
     bracelet_secrets = world.get_region(RegionNames.BRACELET_SECRETS, player)
 
-    for cave_name in cave_names:
+    mapped_entrances = set()
+    for cave_name in all_cave_names:
+        # group all shops/take anys
+        if cave_name in all_arrow_shop_names:
+            cave_name = RegionNames.ARROW_SHOPS
+        elif cave_name in all_candle_shop_names:
+            cave_name = RegionNames.CANDLE_SHOPS
+        elif cave_name in all_shield_shop_names:
+            cave_name = RegionNames.SHIELD_SHOPS
+        elif cave_name in all_medicine_shop_names:
+            cave_name = RegionNames.MEDICINE_SHOPS
+        elif cave_name in all_take_any_names:
+            cave_name = RegionNames.TAKE_ANYS
+
         cave_region: Cave = world.get_region(cave_name, player)
         metadata = cave_region.metadata
+        if mapped_entrances.contains((cave_name, metadata.entrance_type)):
+            continue
+
+        mapped_entrances.add((cave_name, metadata.entrance_type))
         if metadata.entrance_type == CaveRequirement.NONE:
             _connect_unrestricted(
                 overworld_mainland, cave_region, f"Enter {cave_name}", f"Exit {cave_name}"
@@ -495,6 +634,9 @@ def connect_regions(
                 f"Push a Rock and Enter {cave_name}",
                 f"Exit {cave_name}"
             )
+    
+    for arrow_shop_name in all_arrow_shop_names:
+        arrow_shop: Cave = world.get_region(arrow_shop_name)
 
 def _connect_restricted(
         src_region: Region,

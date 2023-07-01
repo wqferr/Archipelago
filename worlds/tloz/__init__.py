@@ -1,5 +1,6 @@
 import os
 import threading
+import typing
 from pkgutil import get_data
 from typing import Dict, Any
 
@@ -12,7 +13,7 @@ from .Items import item_table, item_prices, item_game_ids
 from .Locations import location_table, level_locations, major_locations, shop_locations, all_level_locations, \
     standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations, \
     take_any_locations
-from .Regions import create_regions, connect_regions, RegionNames
+from .Regions import create_regions, connect_regions, RegionNames, Cave, all_cave_names
 from .Options import tloz_options
 from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, first_quest_dungeon_items_late
 from .Rules import set_rules
@@ -93,61 +94,75 @@ class TLoZWorld(World):
     def create_location(self, name, id, parent, event=False):
         return_location = TLoZLocation(self.player, name, id, parent)
         return_location.event = event
+        parent.locations.append(return_location)
         return return_location
+    
+    def should_shuffle_this_cave(self, cave_name):
+        return cave_name != RegionNames.START_SWORD_CAVE \
+            or self.StartingPosition[self.player] != "safe"
 
+    def shuffle_caves(self):
+        shuffled_caves = list(all_cave_names)
+        self.multiworld.random.shuffle(shuffled_caves)
+        shufflable_caves_in_order = [
+            self.multiworld.get_region(name)
+            for name in all_cave_names
+            if self.should_shuffle_this_cave(name)
+        ]
+        shuffled_caves_metadata = [cave.metadata for cave in shufflable_caves_in_order]
+        self.multiworld.random.shuffle(shuffled_caves_metadata)
+
+        for cave, metadata in zip(shufflable_caves_in_order, shuffled_caves_metadata):
+            cave.metadata = metadata
+    
     def create_regions(self):
         create_regions(self.multiworld, self.player)
-        ganon = self.create_location("Ganon", None, self.multiworld.get_region("Level 9", self.player))
-        zelda = self.create_location("Zelda", None, self.multiworld.get_region("Level 9", self.player))
-        ganon.show_in_spoiler = False
-        zelda.show_in_spoiler = False
-        self.levels[9].locations.append(ganon)
-        self.levels[9].locations.append(zelda)
+        if self.multiworld.ShuffleCaves[self.player]:
+            self.shuffle_caves()
+        connect_regions(self.multiworld, self.player)
         
-        overworld_mainland = self.multiworld.get_region(RegionNames.OVERWORLD_MAINLAND, self.player)
         self.levels = [None]  # Yes I'm making a one-indexed array in a zero-indexed language. I hate me too.
         for i, level in enumerate(level_locations):
             for location in level:
                 if self.multiworld.ExpandedPool[self.player] or "Drop" not in location:
-                    self.levels[i + 1].locations.append(
-                        self.create_location(
-                            location, self.location_name_to_id[location], self.levels[i + 1]
-                        )
+                    level = self.multiworld.get_region(RegionNames.LEVELS[i+1])
+                    self.create_location(
+                        location, self.location_name_to_id[location], level
                     )
+                    self.levels.append(level)
+
+        ganon = self.create_location("Ganon", None, self.levels[9])
+        zelda = self.create_location("Zelda", None, self.levels[9])
+        ganon.show_in_spoiler = False
+        zelda.show_in_spoiler = False
 
         for level in range(1, 9):
             boss_event = self.create_location(
                 f"Level {level} Boss Status",
                 None,
-                self.multiworld.get_region(RegionNames.LEVELS[level], self.player),
+                self.levels[level],
                 True
             )
             boss_event.show_in_spoiler = False
-            self.levels[level].locations.append(boss_event)
 
         for (location_name, region_name) in major_locations:
             region = self.multiworld.get_region(region_name)
-            location = self.create_location(
+            self.create_location(
                 location_name, self.location_name_to_id[location_name], region
             )
-            region.locations.append(location)
                 
         if self.multiworld.ExpandedPool[self.player]:
             take_any_region = self.multiworld.get_region(RegionNames.TAKE_ANYS, self.player)
             for location_name in take_any_locations:
-                take_any_region.locations.append(
-                    self.create_location(
-                        location_name, self.location_name_to_id[location_name], take_any_region
-                    )
+                self.create_location(
+                    location_name, self.location_name_to_id[location_name], take_any_region
                 )
 
         for (shop_slots, shop_name) in shop_locations:
             shop_region = self.multiworld.get_region(shop_name)
             for slot_name in shop_slots:
-                shop_region.locations.append(
-                    self.create_location(
-                        slot_name, self.location_name_to_id[slot_name], shop_region
-                    )
+                self.create_location(
+                    slot_name, self.location_name_to_id[slot_name], shop_region
                 )
 
     def create_items(self):
