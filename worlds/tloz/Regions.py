@@ -166,20 +166,22 @@ all_take_any_names = [
 ]
 
 def create_regions(world: MultiWorld, player: int):
-    main_menu = Region(RegionNames.MAIN_MENU, player, world)
-    overworld_mainland = Region(RegionNames.OVERWORLD_MAINLAND, player, world)
-    bombable_secrets = Region(RegionNames.BOMBABLES, player, world)
-    raft_islands = Region(RegionNames.RAFT_ISLANDS, player, world)
-    recorder_secrets = Region(RegionNames.RECORDER_SECRETS, player, world)
-    candle_secrets = Region(RegionNames.BURNABLES, player, world)
-    bracelet_secrets = Region(RegionNames.BRACELET_SECRETS, player, world)
-    stepladder_dock = Region(RegionNames.STEPLADDER_DOCK, player, world)
-    shield_shops = Region(RegionNames.SHIELD_SHOPS, player, world)
-    arrow_shops = Region(RegionNames.ARROW_SHOPS, player, world)
-    candle_shops = Region(RegionNames.CANDLE_SHOPS, player, world)
-    medicine_shops = Region(RegionNames.MEDICINE_SHOPS, player, world)
-    blue_ring_shop = Region(RegionNames.BLUE_RING_SHOP, player, world)
-    take_anys = Region(RegionNames.TAKE_ANYS, player, world)
+    def new_top_level_region(name):
+        return Region(name, player, world)
+    main_menu = new_top_level_region(RegionNames.MAIN_MENU)
+    overworld_mainland = new_top_level_region(RegionNames.OVERWORLD_MAINLAND)
+    bombable_secrets = new_top_level_region(RegionNames.BOMBABLES)
+    raft_islands = new_top_level_region(RegionNames.RAFT_ISLANDS)
+    recorder_secrets = new_top_level_region(RegionNames.RECORDER_SECRETS)
+    candle_secrets = new_top_level_region(RegionNames.BURNABLES)
+    bracelet_secrets = new_top_level_region(RegionNames.BRACELET_SECRETS)
+    stepladder_dock = new_top_level_region(RegionNames.STEPLADDER_DOCK)
+    shield_shops = new_top_level_region(RegionNames.SHIELD_SHOPS)
+    arrow_shops = new_top_level_region(RegionNames.ARROW_SHOPS)
+    candle_shops = new_top_level_region(RegionNames.CANDLE_SHOPS)
+    medicine_shops = new_top_level_region(RegionNames.MEDICINE_SHOPS)
+    blue_ring_shop = new_top_level_region(RegionNames.BLUE_RING_SHOP)
+    take_anys = new_top_level_region(RegionNames.TAKE_ANYS)
 
     top_level_regions = [
         main_menu,
@@ -543,11 +545,3 @@ def _connect_unrestricted(
     src_region.add_exits({dst_region.name: action_description})
     if way_back_action_description is not None:
         dst_region.add_exits({src_region.name: way_back_action_description})
-
-def _connect_subregion(parent_region: Region, child_region: Region):
-    _connect_unrestricted(
-        parent_region,
-        child_region,
-        f"{parent_region.name} -> {child_region.name}"
-        f"{child_region.name} -> {parent_region.name}"
-    )
