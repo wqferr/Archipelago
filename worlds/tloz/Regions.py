@@ -635,6 +635,15 @@ def connect_regions(world: MultiWorld, player: int):
                 f"Exit {cave_name}"
             )
     
+    for level_name in RegionNames.LEVELS:
+        level = world.get_region(level_name, player)
+        _connect_restricted(
+            overworld_mainland,
+            level,
+            lambda state: state.has("Recorder", player),
+            "Warp to"
+        )
+    
     for arrow_shop_name in all_arrow_shop_names:
         arrow_shop: Cave = world.get_region(arrow_shop_name)
 
