@@ -16,7 +16,7 @@ class CaveRequirement(Enum):
 
 CaveMetadata = namedtuple(
     "CaveMetadata",
-    ["screen_code", "entrance_type"],
+    ["screen_code", "entrance_type", "location_name"],
     defaults=[CaveRequirement.NONE]
 )
 

@@ -108,6 +108,39 @@ class RegionNames:
     START_CANDLE_SHOP = "Start Candle Shop"
     START_MEDICINE_SHOP = "Start Medicine Shop"
 
+
+class LocationNames:
+    START_SWORD_CAVE = "Starting Sword Cave"
+    WHITE_SWORD_CAVE = "White Sword Pond"
+    MAGICAL_SWORD_GRAVE = "Magical Sword Grave"
+    ARMOS_KNIGHTS = "Armos Knights"
+    OCEAN_HEART_CONTAINER = "Ocean Heart Container"
+    LETTER_CAVE = "Letter Cave"
+
+    TAKE_ANY_LEFT = "Take Any Item Left"
+    TAKE_ANY_MIDDLE = "Take Any Item Middle"
+    TAKE_ANY_RIGHT = "Take Any Item Right"
+
+    ARROW_SHOP_LEFT = "Arrow Shop Item Left"
+    ARROW_SHOP_MIDDLE = "Arrow Shop Item Middle"
+    ARROW_SHOP_RIGHT = "Arrow Shop Item Right"
+
+    CANDLE_SHOP_LEFT = "Candle Shop Item Left"
+    CANDLE_SHOP_MIDDLE = "Candle Shop Item Middle"
+    CANDLE_SHOP_RIGHT = "Candle Shop Item Right"
+
+    BLUE_RING_SHOP_LEFT = "Blue Ring Shop Item Left"
+    BLUE_RING_SHOP_MIDDLE = "Blue Ring Shop Item Middle"
+    BLUE_RING_SHOP_RIGHT = "Blue Ring Shop Item Right"
+
+    SHIELD_SHOP_LEFT = "Shield Shop Item Left"
+    SHIELD_SHOP_MIDDLE = "Shield Shop Item Middle"
+    SHIELD_SHOP_RIGHT = "Shield Shop Item Right"
+
+    POTION_SHOP_LEFT = "Potion Shop Item Left"
+    POTION_SHOP_MIDDLE = "Potion Shop Item Middle"
+    POTION_SHOP_RIGHT = "Potion Shop Item Right"
+
 class ItemNames:
     BOOMERANG = "Boomerang"
     BOW = "Bow"

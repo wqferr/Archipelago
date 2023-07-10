@@ -1,21 +1,22 @@
 from . import Rom
-from .Names import RegionNames
+from .Names import RegionNames, LocationNames
 
 major_locations = [
-    ("Starting Sword Cave", RegionNames.START_SWORD_CAVE),
-    ("White Sword Pond", RegionNames.WHITE_SWORD_CAVE),
-    ("Magical Sword Grave", RegionNames.MAGICAL_SWORD_CAVE),
-    ("Armos Knights", RegionNames.OVERWORLD_MAINLAND),
-    ("Ocean Heart Container", RegionNames.STEPLADDER_DOCK),
-    ("Letter Cave", RegionNames.OVERWORLD_MAINLAND),
+    (LocationNames.START_SWORD_CAVE, RegionNames.START_SWORD_CAVE),
+    (LocationNames.WHITE_SWORD_CAVE, RegionNames.WHITE_SWORD_CAVE),
+    (LocationNames.MAGICAL_SWORD_GRAVE, RegionNames.MAGICAL_SWORD_CAVE),
+    (LocationNames.ARMOS_KNIGHTS, RegionNames.OVERWORLD_MAINLAND),
+    (LocationNames.OCEAN_HEART_CONTAINER, RegionNames.STEPLADDER_DOCK),
+    (LocationNames.LETTER_CAVE, RegionNames.OVERWORLD_MAINLAND),
 ]
 
 take_any_locations = [
-    "Take Any Item Left",
-    "Take Any Item Middle",
-    "Take Any Item Right"
+    LocationNames.TAKE_ANY_LEFT,
+    LocationNames.TAKE_ANY_MIDDLE,
+    LocationNames.TAKE_ANY_RIGHT
 ]
 
+# TODO export those to LocationNames
 level_locations = [
     [
         "Level 1 Item (Bow)", "Level 1 Item (Boomerang)", "Level 1 Map", "Level 1 Compass", "Level 1 Boss",
@@ -96,14 +97,15 @@ all_level_locations = [location for level in level_locations for location in lev
 standard_level_locations = [location for level in level_locations for location in level if "Drop" not in location]
 
 shop_locations = [
-    (("Arrow Shop Item Left", "Arrow Shop Item Middle", "Arrow Shop Item Right"), RegionNames.ARROW_SHOPS),
-    (("Candle Shop Item Left", "Candle Shop Item Middle", "Candle Shop Item Right"), RegionNames.CANDLE_SHOPS),
-    (("Blue Ring Shop Item Left", "Blue Ring Shop Item Middle", "Blue Ring Shop Item Right"), RegionNames.BLUE_RING_SHOP),
-    (("Shield Shop Item Left", "Shield Shop Item Middle", "Shield Shop Item Right"), RegionNames.SHIELD_SHOPS),
-    (("Potion Shop Item Left", "Potion Shop Item Middle", "Potion Shop Item Right"), RegionNames.MEDICINE_SHOPS)
+    ((LocationNames.ARROW_SHOP_LEFT, LocationNames.ARROW_SHOP_MIDDLE, LocationNames.ARROW_SHOP_RIGHT), RegionNames.ARROW_SHOPS),
+    ((LocationNames.CANDLE_SHOP_LEFT, LocationNames.CANDLE_SHOP_MIDDLE, LocationNames.CANDLE_SHOP_RIGHT), RegionNames.CANDLE_SHOPS),
+    ((LocationNames.BLUE_RING_SHOP_LEFT, LocationNames.BLUE_RING_SHOP_MIDDLE, LocationNames.BLUE_RING_SHOP_RIGHT), RegionNames.BLUE_RING_SHOP),
+    ((LocationNames.SHIELD_SHOP_LEFT, LocationNames.SHIELD_SHOP_MIDDLE, LocationNames.SHIELD_SHOP_RIGHT), RegionNames.SHIELD_SHOPS),
+    ((LocationNames.POTION_SHOP_LEFT, LocationNames.POTION_SHOP_MIDDLE, LocationNames.POTION_SHOP_RIGHT), RegionNames.MEDICINE_SHOPS)
 ]
 shop_slots = [slot for entry in shop_locations for slot in entry[0]]
 
+# TODO export these to LocationNames
 food_locations = [
     "Level 7 Map", "Level 7 Boss", "Level 7 Triforce", "Level 7 Key Drop (Goriyas)",
     "Level 7 Bomb Drop (Moldorms North)", "Level 7 Bomb Drop (Goriyas North)",
@@ -258,39 +260,39 @@ for key, value in floor_location_game_offsets_late.items():
 dungeon_items = {**floor_location_game_ids_early, **floor_location_game_ids_late}
 
 shop_location_ids = {
-    "Arrow Shop Item Left": 0x18637,
-    "Arrow Shop Item Middle": 0x18638,
-    "Arrow Shop Item Right": 0x18639,
-    "Candle Shop Item Left": 0x1863A,
-    "Candle Shop Item Middle": 0x1863B,
-    "Candle Shop Item Right": 0x1863C,
-    "Shield Shop Item Left": 0x1863D,
-    "Shield Shop Item Middle": 0x1863E,
-    "Shield Shop Item Right": 0x1863F,
-    "Blue Ring Shop Item Left": 0x18640,
-    "Blue Ring Shop Item Middle": 0x18641,
-    "Blue Ring Shop Item Right": 0x18642,
-    "Potion Shop Item Left": 0x1862E,
-    "Potion Shop Item Middle": 0x1862F,
-    "Potion Shop Item Right": 0x18630
+    LocationNames.ARROW_SHOP_LEFT: 0x18637,
+    LocationNames.ARROW_SHOP_MIDDLE: 0x18638,
+    LocationNames.ARROW_SHOP_RIGHT: 0x18639,
+    LocationNames.CANDLE_SHOP_LEFT: 0x1863A,
+    LocationNames.CANDLE_SHOP_MIDDLE: 0x1863B,
+    LocationNames.CANDLE_SHOP_RIGHT: 0x1863C,
+    LocationNames.SHIELD_SHOP_LEFT: 0x1863D,
+    LocationNames.SHIELD_SHOP_MIDDLE: 0x1863E,
+    LocationNames.SHIELD_SHOP_RIGHT: 0x1863F,
+    LocationNames.BLUE_RING_SHOP_LEFT: 0x18640,
+    LocationNames.BLUE_RING_SHOP_MIDDLE: 0x18641,
+    LocationNames.BLUE_RING_SHOP_RIGHT: 0x18642,
+    LocationNames.POTION_SHOP_LEFT: 0x1862E,
+    LocationNames.POTION_SHOP_MIDDLE: 0x1862F,
+    LocationNames.POTION_SHOP_RIGHT: 0x18630
 }
 
 shop_price_location_ids = {
-    "Arrow Shop Item Left": 0x18673,
-    "Arrow Shop Item Middle": 0x18674,
-    "Arrow Shop Item Right": 0x18675,
-    "Candle Shop Item Left": 0x18676,
-    "Candle Shop Item Middle": 0x18677,
-    "Candle Shop Item Right": 0x18678,
-    "Shield Shop Item Left": 0x18679,
-    "Shield Shop Item Middle": 0x1867A,
-    "Shield Shop Item Right": 0x1867B,
-    "Blue Ring Shop Item Left": 0x1867C,
-    "Blue Ring Shop Item Middle": 0x1867D,
-    "Blue Ring Shop Item Right": 0x1867E,
-    "Potion Shop Item Left": 0x1866A,
-    "Potion Shop Item Middle": 0x1866B,
-    "Potion Shop Item Right": 0x1866C
+    LocationNames.ARROW_SHOP_LEFT: 0x18673,
+    LocationNames.ARROW_SHOP_MIDDLE: 0x18674,
+    LocationNames.ARROW_SHOP_RIGHT: 0x18675,
+    LocationNames.CANDLE_SHOP_LEFT: 0x18676,
+    LocationNames.CANDLE_SHOP_MIDDLE: 0x18677,
+    LocationNames.CANDLE_SHOP_RIGHT: 0x18678,
+    LocationNames.SHIELD_SHOP_LEFT: 0x18679,
+    LocationNames.SHIELD_SHOP_MIDDLE: 0x1867A,
+    LocationNames.SHIELD_SHOP_RIGHT: 0x1867B,
+    LocationNames.BLUE_RING_SHOP_LEFT: 0x1867C,
+    LocationNames.BLUE_RING_SHOP_MIDDLE: 0x1867D,
+    LocationNames.BLUE_RING_SHOP_RIGHT: 0x1867E,
+    LocationNames.POTION_SHOP_LEFT: 0x1866A,
+    LocationNames.POTION_SHOP_MIDDLE: 0x1866B,
+    LocationNames.POTION_SHOP_RIGHT: 0x1866C
 }
 
 secret_money_ids = {
@@ -300,36 +302,36 @@ secret_money_ids = {
 }
 
 major_location_ids = {
-    "Starting Sword Cave": 0x18611,
-    "White Sword Pond": 0x18617,
-    "Magical Sword Grave": 0x1861A,
-    "Letter Cave": 0x18629,
-    "Take Any Item Left": 0x18613,
-    "Take Any Item Middle": 0x18614,
-    "Take Any Item Right": 0x18615,
-    "Armos Knights": 0x10D05,
-    "Ocean Heart Container": 0x1789A
+    LocationNames.START_SWORD_CAVE: 0x18611,
+    LocationNames.WHITE_SWORD_CAVE: 0x18617,
+    LocationNames.MAGICAL_SWORD_GRAVE: 0x1861A,
+    LocationNames.LETTER_CAVE: 0x18629,
+    LocationNames.TAKE_ANY_LEFT: 0x18613,
+    LocationNames.TAKE_ANY_MIDDLE: 0x18614,
+    LocationNames.TAKE_ANY_RIGHT: 0x18615,
+    LocationNames.ARMOS_KNIGHTS: 0x10D05,
+    LocationNames.OCEAN_HEART_CONTAINER: 0x1789A
 }
 
 major_location_offsets = {
-    "Starting Sword Cave": 0x77,
-    "White Sword Pond": 0x0A,
-    "Magical Sword Grave": 0x21,
-    "Letter Cave": 0x0E,
+    LocationNames.START_SWORD_CAVE: 0x77,
+    LocationNames.WHITE_SWORD_CAVE: 0x0A,
+    LocationNames.MAGICAL_SWORD_GRAVE: 0x21,
+    LocationNames.LETTER_CAVE: 0x0E,
     # "Take Any Item Left": 0x7B,
     # "Take Any Item Middle": 0x2C,
     # "Take Any Item Right": 0x47,
-    "Armos Knights": 0x24,
-    "Ocean Heart Container": 0x5F
+    LocationNames.ARMOS_KNIGHTS: 0x24,
+    LocationNames.OCEAN_HEART_CONTAINER: 0x5F
 }
 
 overworld_locations = [
-    "Starting Sword Cave",
-    "White Sword Pond",
-    "Magical Sword Grave",
-    "Letter Cave",
-    "Armos Knights",
-    "Ocean Heart Container"
+    LocationNames.START_SWORD_CAVE,
+    LocationNames.WHITE_SWORD_CAVE,
+    LocationNames.MAGICAL_SWORD_GRAVE,
+    LocationNames.LETTER_CAVE,
+    LocationNames.ARMOS_KNIGHTS,
+    LocationNames.OCEAN_HEART_CONTAINER
 ]
 
 underworld1_locations = [*floor_location_game_offsets_early.keys()]
