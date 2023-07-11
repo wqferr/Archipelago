@@ -5,7 +5,7 @@ major_locations = [
     (LocationNames.START_SWORD_CAVE, RegionNames.START_SWORD_CAVE),
     (LocationNames.WHITE_SWORD_CAVE, RegionNames.WHITE_SWORD_CAVE),
     (LocationNames.MAGICAL_SWORD_GRAVE, RegionNames.MAGICAL_SWORD_CAVE),
-    (LocationNames.ARMOS_KNIGHTS, RegionNames.OVERWORLD_MAINLAND),
+    (LocationNames.ARMOS_KNIGHTS, RegionNames.ARMOS_KNIGHTS),
     (LocationNames.OCEAN_HEART_CONTAINER, RegionNames.STEPLADDER_DOCK),
     (LocationNames.LETTER_CAVE, RegionNames.OVERWORLD_MAINLAND),
 ]
@@ -16,80 +16,16 @@ take_any_locations = [
     LocationNames.TAKE_ANY_RIGHT
 ]
 
-# TODO export those to LocationNames
 level_locations = [
-    [
-        "Level 1 Item (Bow)", "Level 1 Item (Boomerang)", "Level 1 Map", "Level 1 Compass", "Level 1 Boss",
-        "Level 1 Triforce", "Level 1 Key Drop (Keese Entrance)", "Level 1 Key Drop (Stalfos Middle)",
-        "Level 1 Key Drop (Moblins)", "Level 1 Key Drop (Stalfos Water)",
-        "Level 1 Key Drop (Stalfos Entrance)", "Level 1 Key Drop (Wallmasters)",
-    ],
-    [
-        "Level 2 Item (Magical Boomerang)", "Level 2 Map", "Level 2 Compass", "Level 2 Boss", "Level 2 Triforce",
-        "Level 2 Key Drop (Ropes West)", "Level 2 Key Drop (Moldorms)",
-        "Level 2 Key Drop (Ropes Middle)", "Level 2 Key Drop (Ropes Entrance)",
-        "Level 2 Bomb Drop (Keese)", "Level 2 Bomb Drop (Moblins)",
-        "Level 2 Rupee Drop (Gels)",
-    ],
-    [
-        "Level 3 Item (Raft)", "Level 3 Map", "Level 3 Compass", "Level 3 Boss", "Level 3 Triforce",
-        "Level 3 Key Drop (Zols and Keese West)", "Level 3 Key Drop (Keese North)",
-        "Level 3 Key Drop (Zols Central)", "Level 3 Key Drop (Zols South)",
-        "Level 3 Key Drop (Zols Entrance)", "Level 3 Bomb Drop (Darknuts West)",
-        "Level 3 Bomb Drop (Keese Corridor)", "Level 3 Bomb Drop (Darknuts Central)",
-        "Level 3 Rupee Drop (Zols and Keese East)"
-    ],
-    [
-        "Level 4 Item (Stepladder)", "Level 4 Map", "Level 4 Compass", "Level 4 Boss", "Level 4 Triforce",
-        "Level 4 Key Drop (Keese Entrance)", "Level 4 Key Drop (Keese Central)",
-        "Level 4 Key Drop (Zols)", "Level 4 Key Drop (Keese North)",
-    ],
-    [
-        "Level 5 Item (Recorder)", "Level 5 Map", "Level 5 Compass", "Level 5 Boss", "Level 5 Triforce",
-        "Level 5 Key Drop (Keese North)", "Level 5 Key Drop (Gibdos North)",
-        "Level 5 Key Drop (Gibdos Central)", "Level 5 Key Drop (Pols Voice Entrance)",
-        "Level 5 Key Drop (Gibdos Entrance)", "Level 5 Key Drop (Gibdos, Keese, and Pols Voice)",
-        "Level 5 Key Drop (Zols)", "Level 5 Bomb Drop (Gibdos)",
-        "Level 5 Bomb Drop (Dodongos)", "Level 5 Rupee Drop (Zols)",
-    ],
-    [
-        "Level 6 Item (Magical Rod)", "Level 6 Map", "Level 6 Compass", "Level 6 Boss", "Level 6 Triforce",
-        "Level 6 Key Drop (Wizzrobes Entrance)", "Level 6 Key Drop (Keese)",
-        "Level 6 Key Drop (Wizzrobes North Island)", "Level 6 Key Drop (Wizzrobes North Stream)",
-        "Level 6 Key Drop (Vires)", "Level 6 Bomb Drop (Wizzrobes)",
-        "Level 6 Rupee Drop (Wizzrobes)"
-    ],
-    [
-        "Level 7 Item (Red Candle)", "Level 7 Map", "Level 7 Compass", "Level 7 Boss", "Level 7 Triforce",
-        "Level 7 Key Drop (Ropes)", "Level 7 Key Drop (Goriyas)", "Level 7 Key Drop (Stalfos)",
-        "Level 7 Key Drop (Moldorms)", "Level 7 Bomb Drop (Goriyas South)", "Level 7 Bomb Drop (Keese and Spikes)",
-        "Level 7 Bomb Drop (Moldorms South)", "Level 7 Bomb Drop (Moldorms North)",
-        "Level 7 Bomb Drop (Goriyas North)", "Level 7 Bomb Drop (Dodongos)",
-        "Level 7 Bomb Drop (Digdogger)", "Level 7 Rupee Drop (Goriyas Central)",
-        "Level 7 Rupee Drop (Dodongos)", "Level 7 Rupee Drop (Goriyas North)",
-    ],
-    [
-        "Level 8 Item (Magical Key)", "Level 8 Map", "Level 8 Compass", "Level 8 Item (Book of Magic)", "Level 8 Boss",
-        "Level 8 Triforce", "Level 8 Key Drop (Darknuts West)",
-        "Level 8 Key Drop (Darknuts Far West)", "Level 8 Key Drop (Pols Voice South)",
-        "Level 8 Key Drop (Pols Voice and Keese)", "Level 8 Key Drop (Darknuts Central)",
-        "Level 8 Key Drop (Keese and Zols Entrance)", "Level 8 Bomb Drop (Darknuts North)",
-        "Level 8 Bomb Drop (Darknuts East)", "Level 8 Bomb Drop (Pols Voice North)",
-        "Level 8 Rupee Drop (Manhandla Entrance West)", "Level 8 Rupee Drop (Manhandla Entrance North)",
-        "Level 8 Rupee Drop (Darknuts and Gibdos)",
-    ],
-    [
-        "Level 9 Item (Silver Arrow)", "Level 9 Item (Red Ring)",
-        "Level 9 Map", "Level 9 Compass",
-        "Level 9 Key Drop (Patra Southwest)", "Level 9 Key Drop (Like Likes and Zols East)",
-        "Level 9 Key Drop (Wizzrobes and Bubbles East)", "Level 9 Key Drop (Wizzrobes East Island)",
-        "Level 9 Bomb Drop (Blue Lanmolas)", "Level 9 Bomb Drop (Gels Lake)",
-        "Level 9 Bomb Drop (Like Likes and Zols Corridor)", "Level 9 Bomb Drop (Patra Northeast)",
-        "Level 9 Bomb Drop (Vires)", "Level 9 Rupee Drop (Wizzrobes West Island)",
-        "Level 9 Rupee Drop (Red Lanmolas)", "Level 9 Rupee Drop (Keese Southwest)",
-        "Level 9 Rupee Drop (Keese Central Island)", "Level 9 Rupee Drop (Wizzrobes Central)",
-        "Level 9 Rupee Drop (Wizzrobes North Island)", "Level 9 Rupee Drop (Gels East)"
-    ]
+    LocationNames.LEVEL_1_LOCATIONS,
+    LocationNames.LEVEL_2_LOCATIONS,
+    LocationNames.LEVEL_3_LOCATIONS,
+    LocationNames.LEVEL_4_LOCATIONS,
+    LocationNames.LEVEL_5_LOCATIONS,
+    LocationNames.LEVEL_6_LOCATIONS,
+    LocationNames.LEVEL_7_LOCATIONS,
+    LocationNames.LEVEL_8_LOCATIONS,
+    LocationNames.LEVEL_9_LOCATIONS
 ]
 
 all_level_locations = [location for level in level_locations for location in level]
@@ -104,6 +40,12 @@ shop_locations = [
     ((LocationNames.POTION_SHOP_LEFT, LocationNames.POTION_SHOP_MIDDLE, LocationNames.POTION_SHOP_RIGHT), RegionNames.MEDICINE_SHOPS)
 ]
 shop_slots = [slot for entry in shop_locations for slot in entry[0]]
+
+arrow_shop_locations = [LocationNames.ARROW_SHOP_LEFT, LocationNames.ARROW_SHOP_MIDDLE, LocationNames.ARROW_SHOP_RIGHT]
+candle_shop_locations = [LocationNames.CANDLE_SHOP_LEFT, LocationNames.CANDLE_SHOP_MIDDLE, LocationNames.CANDLE_SHOP_RIGHT]
+blue_ring_shop_locations = [LocationNames.BLUE_RING_SHOP_LEFT, LocationNames.BLUE_RING_SHOP_MIDDLE, LocationNames.BLUE_RING_SHOP_RIGHT]
+shield_shop_locations = [LocationNames.SHIELD_SHOP_LEFT, LocationNames.SHIELD_SHOP_MIDDLE, LocationNames.SHIELD_SHOP_RIGHT]
+potion_shop_locations = [LocationNames.POTION_SHOP_LEFT, LocationNames.POTION_SHOP_MIDDLE, LocationNames.POTION_SHOP_RIGHT]
 
 # TODO export these to LocationNames
 food_locations = [
@@ -318,9 +260,6 @@ major_location_offsets = {
     LocationNames.WHITE_SWORD_CAVE: 0x0A,
     LocationNames.MAGICAL_SWORD_GRAVE: 0x21,
     LocationNames.LETTER_CAVE: 0x0E,
-    # "Take Any Item Left": 0x7B,
-    # "Take Any Item Middle": 0x2C,
-    # "Take Any Item Right": 0x47,
     LocationNames.ARMOS_KNIGHTS: 0x24,
     LocationNames.OCEAN_HEART_CONTAINER: 0x5F
 }

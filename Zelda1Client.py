@@ -18,7 +18,7 @@ from CommonClient import CommonContext, server_loop, gui_enabled, console_loop, 
     get_base_parser
 
 from worlds.tloz.Items import item_game_ids
-from worlds.tloz.Locations import location_ids
+from worlds.tloz.Locations import location_ids, major_location_offsets
 from worlds.tloz import Items, Locations, Rom
 
 SYSTEM_MESSAGE_ID = 0
@@ -37,6 +37,7 @@ location_ids = location_ids
 items_by_id = {id: item for item, id in item_ids.items()}
 locations_by_id = {id: location for location, id in location_ids.items()}
 
+_synced_major_location_offsets = False
 
 class ZeldaCommandProcessor(ClientCommandProcessor):
 
@@ -185,157 +186,169 @@ def get_shop_bit_from_name(location_name):
 async def parse_locations(locations_array, ctx: ZeldaContext, force: bool, zone="None"):
     if locations_array == ctx.locations_array and not force:
         return
-    else:
-        # print("New values")
-        ctx.locations_array = locations_array
-        locations_checked = []
-        location = None
-        for location in ctx.missing_locations:
-            location_name = lookup_any_location_id_to_name[location]
+    ctx.locations_array = locations_array
+    locations_checked = []
+    location = None
+    for location in ctx.missing_locations:
+        location_name = lookup_any_location_id_to_name[location]
 
-            # TODO fix this
-            if location_name in Locations.overworld_locations and zone == "overworld":
-                status = locations_array[Locations.major_location_offsets[location_name]]
-                if location_name == "Ocean Heart Container":
-                    status = locations_array[ctx.overworld_item]
-                if location_name == "Armos Knights":
-                    status = locations_array[ctx.armos_item]
-                if status & 0x10:
-                    ctx.locations_checked.add(location)
-                    locations_checked.append(location)
-            elif location_name in Locations.underworld1_locations and zone == "underworld1":
-                status = locations_array[Locations.floor_location_game_offsets_early[location_name]]
-                if status & 0x10:
-                    ctx.locations_checked.add(location)
-                    locations_checked.append(location)
-            elif location_name in Locations.underworld2_locations and zone == "underworld2":
-                status = locations_array[Locations.floor_location_game_offsets_late[location_name]]
-                if status & 0x10:
-                    ctx.locations_checked.add(location)
-                    locations_checked.append(location)
-            elif (location_name in Locations.shop_locations or "Take" in location_name) and zone == "caves":
-                shop_bit = get_shop_bit_from_name(location_name)
-                slot = 0
+        # TODO fix this
+        if location_name in Locations.overworld_locations and zone == "overworld":
+            status = locations_array[Locations.major_location_offsets[location_name]]
+            if location_name == "Ocean Heart Container":
+                status = locations_array[ctx.overworld_item]
+            if location_name == "Armos Knights":
+                status = locations_array[ctx.armos_item]
+            if status & 0x10:
+                ctx.locations_checked.add(location)
+                locations_checked.append(location)
+        elif location_name in Locations.underworld1_locations and zone == "underworld1":
+            status = locations_array[Locations.floor_location_game_offsets_early[location_name]]
+            if status & 0x10:
+                ctx.locations_checked.add(location)
+                locations_checked.append(location)
+        elif location_name in Locations.underworld2_locations and zone == "underworld2":
+            status = locations_array[Locations.floor_location_game_offsets_late[location_name]]
+            if status & 0x10:
+                ctx.locations_checked.add(location)
+                locations_checked.append(location)
+        elif (location_name in Locations.shop_locations or "Take" in location_name) and zone == "caves":
+            shop_bit = get_shop_bit_from_name(location_name)
+            slot = 0
+            context_slot = 0
+            if "Left" in location_name:
+                slot = "slot1"
                 context_slot = 0
-                if "Left" in location_name:
-                    slot = "slot1"
-                    context_slot = 0
-                elif "Middle" in location_name:
-                    slot = "slot2"
-                    context_slot = 1
-                elif "Right" in location_name:
-                    slot = "slot3"
-                    context_slot = 2
-                if locations_array[slot] & shop_bit > 0:
-                    locations_checked.append(location)
-                    ctx.shop_slots[context_slot] |= shop_bit
-                if locations_array["takeAnys"] and locations_array["takeAnys"] >= 4:
-                    if "Take Any" in location_name:
-                        short_name = None
-                        if "Left" in location_name:
-                            short_name = "TakeAnyLeft"
-                        elif "Middle" in location_name:
-                            short_name = "TakeAnyMiddle"
-                        elif "Right" in location_name:
-                            short_name = "TakeAnyRight"
-                        if short_name is not None:
-                            item_code = ctx.slot_data[short_name]
-                            if item_code > 0:
-                                ctx.bonus_items.append(item_code)
-                            locations_checked.append(location)
-        if locations_checked:
-            await ctx.send_msgs([
-                {"cmd": "LocationChecks",
-                 "locations": locations_checked}
-            ])
+            elif "Middle" in location_name:
+                slot = "slot2"
+                context_slot = 1
+            elif "Right" in location_name:
+                slot = "slot3"
+                context_slot = 2
+            if locations_array[slot] & shop_bit > 0:
+                locations_checked.append(location)
+                ctx.shop_slots[context_slot] |= shop_bit
+            if locations_array["takeAnys"] and locations_array["takeAnys"] >= 4:
+                if "Take Any" in location_name:
+                    short_name = None
+                    if "Left" in location_name:
+                        short_name = "TakeAnyLeft"
+                    elif "Middle" in location_name:
+                        short_name = "TakeAnyMiddle"
+                    elif "Right" in location_name:
+                        short_name = "TakeAnyRight"
+                    if short_name is not None:
+                        item_code = ctx.slot_data[short_name]
+                        if item_code > 0:
+                            ctx.bonus_items.append(item_code)
+                        locations_checked.append(location)
+    if locations_checked:
+        await ctx.send_msgs([
+            {"cmd": "LocationChecks",
+                "locations": locations_checked}
+        ])
 
+async def _open_nes_streams(ctx: ZeldaContext):
+    if ctx.nes_streams:
+        return True
+    try:
+        logger.debug("Attempting to connect to NES")
+        ctx.nes_streams = await asyncio.wait_for(asyncio.open_connection("localhost", 52980), timeout=10)
+        ctx.nes_status = CONNECTION_TENTATIVE_STATUS
+        return True
+    except TimeoutError:
+        logger.debug("Connection Timed Out, Trying Again")
+        ctx.nes_status = CONNECTION_TIMING_OUT_STATUS
+        return False
+    except ConnectionRefusedError:
+        logger.debug("Connection Refused, Trying Again")
+        ctx.nes_status = CONNECTION_REFUSED_STATUS
+        return False
+
+async def _sync_major_location_offsets(romMajorLocationOffsets: typing.Dict[str, int]):
+    if _synced_major_location_offsets:
+        return
+    for location_name, screen_id in romMajorLocationOffsets.items():
+        major_location_offsets[location_name] = screen_id
+    _synced_major_location_offsets = True
 
 async def nes_sync_task(ctx: ZeldaContext):
     logger.info("Starting nes connector. Use /nes for status information")
+    _sync_major_location_offsets(ctx)
     while not ctx.exit_event.is_set():
         error_status = None
-        if ctx.nes_streams:
-            (reader, writer) = ctx.nes_streams
-            msg = get_payload(ctx).encode()
-            writer.write(msg)
-            writer.write(b'\n')
+        if not _open_nes_streams(ctx):
+            continue
+        (reader, writer) = ctx.nes_streams
+        msg = get_payload(ctx).encode()
+        writer.write(msg)
+        writer.write(b'\n')
+        try:
+            await asyncio.wait_for(writer.drain(), timeout=1.5)
             try:
-                await asyncio.wait_for(writer.drain(), timeout=1.5)
-                try:
-                    # Data will return a dict with up to two fields:
-                    # 1. A keepalive response of the Players Name (always)
-                    # 2. An array representing the memory values of the locations area (if in game)
-                    data = await asyncio.wait_for(reader.readline(), timeout=5)
-                    data_decoded = json.loads(data.decode())
-                    if data_decoded["overworldHC"] is not None:
-                        ctx.overworld_item = data_decoded["overworldHC"]
-                    if data_decoded["overworldPB"] is not None:
-                        ctx.armos_item = data_decoded["overworldPB"]
-                    if data_decoded['gameMode'] == 19 and ctx.finished_game == False:
-                        await ctx.send_msgs([
-                            {"cmd": "StatusUpdate",
-                             "status": 30}
-                        ])
-                        ctx.finished_game = True
-                    if ctx.game is not None and 'overworld' in data_decoded:
-                        # Not just a keep alive ping, parse
-                        asyncio.create_task(parse_locations(data_decoded['overworld'], ctx, False, "overworld"))
-                    if ctx.game is not None and 'underworld1' in data_decoded:
-                        asyncio.create_task(parse_locations(data_decoded['underworld1'], ctx, False, "underworld1"))
-                    if ctx.game is not None and 'underworld2' in data_decoded:
-                        asyncio.create_task(parse_locations(data_decoded['underworld2'], ctx, False, "underworld2"))
-                    if ctx.game is not None and 'caves' in data_decoded:
-                        asyncio.create_task(parse_locations(data_decoded['caves'], ctx, False, "caves"))
-                    if not ctx.auth:
-                        ctx.auth = ''.join([chr(i) for i in data_decoded['playerName'] if i != 0])
-                        if ctx.auth == '':
-                            logger.info("Invalid ROM detected. No player name built into the ROM. Please regenerate"
-                                        "the ROM using the same link but adding your slot name")
-                        if ctx.awaiting_rom:
-                            await ctx.server_auth(False)
-                    reconcile_shops(ctx)
-                except asyncio.TimeoutError:
-                    logger.debug("Read Timed Out, Reconnecting")
-                    error_status = CONNECTION_TIMING_OUT_STATUS
-                    writer.close()
-                    ctx.nes_streams = None
-                except ConnectionResetError as e:
-                    logger.debug("Read failed due to Connection Lost, Reconnecting")
-                    error_status = CONNECTION_RESET_STATUS
-                    writer.close()
-                    ctx.nes_streams = None
-            except TimeoutError:
-                logger.debug("Connection Timed Out, Reconnecting")
+                # Data will return a dict with up to two fields:
+                # 1. A keepalive response of the Players Name (always)
+                # 2. An array representing the memory values of the locations area (if in game)
+                data = await asyncio.wait_for(reader.readline(), timeout=5)
+                data_decoded = json.loads(data.decode())
+                if data_decoded["majorLocationOffsets"] is not None:
+                    _sync_major_location_offsets(data_decoded["majorLocationOffsets"])
+                if data_decoded["overworldHC"] is not None:
+                    ctx.overworld_item = data_decoded["overworldHC"]
+                if data_decoded["overworldPB"] is not None:
+                    ctx.armos_item = data_decoded["overworldPB"]
+                if data_decoded['gameMode'] == 19 and ctx.finished_game == False:
+                    await ctx.send_msgs([
+                        {"cmd": "StatusUpdate",
+                            "status": 30}
+                    ])
+                    ctx.finished_game = True
+                if ctx.game is not None and 'overworld' in data_decoded:
+                    # Not just a keep alive ping, parse
+                    asyncio.create_task(parse_locations(data_decoded['overworld'], ctx, False, "overworld"))
+                if ctx.game is not None and 'underworld1' in data_decoded:
+                    asyncio.create_task(parse_locations(data_decoded['underworld1'], ctx, False, "underworld1"))
+                if ctx.game is not None and 'underworld2' in data_decoded:
+                    asyncio.create_task(parse_locations(data_decoded['underworld2'], ctx, False, "underworld2"))
+                if ctx.game is not None and 'caves' in data_decoded:
+                    asyncio.create_task(parse_locations(data_decoded['caves'], ctx, False, "caves"))
+                if not ctx.auth:
+                    ctx.auth = ''.join([chr(i) for i in data_decoded['playerName'] if i != 0])
+                    if ctx.auth == '':
+                        logger.info("Invalid ROM detected. No player name built into the ROM. Please regenerate"
+                                    "the ROM using the same link but adding your slot name")
+                    if ctx.awaiting_rom:
+                        await ctx.server_auth(False)
+                reconcile_shops(ctx)
+            except asyncio.TimeoutError:
+                logger.debug("Read Timed Out, Reconnecting")
                 error_status = CONNECTION_TIMING_OUT_STATUS
                 writer.close()
                 ctx.nes_streams = None
-            except ConnectionResetError:
-                logger.debug("Connection Lost, Reconnecting")
+            except ConnectionResetError as e:
+                logger.debug("Read failed due to Connection Lost, Reconnecting")
                 error_status = CONNECTION_RESET_STATUS
                 writer.close()
                 ctx.nes_streams = None
-            if ctx.nes_status == CONNECTION_TENTATIVE_STATUS:
-                if not error_status:
-                    logger.info("Successfully Connected to NES")
-                    ctx.nes_status = CONNECTION_CONNECTED_STATUS
-                else:
-                    ctx.nes_status = f"Was tentatively connected but error occured: {error_status}"
-            elif error_status:
-                ctx.nes_status = error_status
-                logger.info("Lost connection to nes and attempting to reconnect. Use /nes for status updates")
-        else:
-            try:
-                logger.debug("Attempting to connect to NES")
-                ctx.nes_streams = await asyncio.wait_for(asyncio.open_connection("localhost", 52980), timeout=10)
-                ctx.nes_status = CONNECTION_TENTATIVE_STATUS
-            except TimeoutError:
-                logger.debug("Connection Timed Out, Trying Again")
-                ctx.nes_status = CONNECTION_TIMING_OUT_STATUS
-                continue
-            except ConnectionRefusedError:
-                logger.debug("Connection Refused, Trying Again")
-                ctx.nes_status = CONNECTION_REFUSED_STATUS
-                continue
+        except TimeoutError:
+            logger.debug("Connection Timed Out, Reconnecting")
+            error_status = CONNECTION_TIMING_OUT_STATUS
+            writer.close()
+            ctx.nes_streams = None
+        except ConnectionResetError:
+            logger.debug("Connection Lost, Reconnecting")
+            error_status = CONNECTION_RESET_STATUS
+            writer.close()
+            ctx.nes_streams = None
+        if ctx.nes_status == CONNECTION_TENTATIVE_STATUS:
+            if not error_status:
+                logger.info("Successfully Connected to NES")
+                ctx.nes_status = CONNECTION_CONNECTED_STATUS
+            else:
+                ctx.nes_status = f"Was tentatively connected but error occured: {error_status}"
+        elif error_status:
+            ctx.nes_status = error_status
+            logger.info("Lost connection to nes and attempting to reconnect. Use /nes for status updates")
 
 
 if __name__ == '__main__':

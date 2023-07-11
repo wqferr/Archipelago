@@ -20,6 +20,8 @@ local cave_index
 local triforce_byte
 local game_state
 
+local majorCaveScreens = nil
+
 local isNesHawk = false
 
 local shopsChecked = {}
@@ -165,7 +167,7 @@ end
 local memDomain = defineMemoryFunctions()
 u8 = memory.read_u8
 wU8 = memory.write_u8
-uRange = memory.readbyterange
+uRange = memory.read_bytes_as_array
 
 itemIDNames = {}
 
@@ -178,7 +180,6 @@ end
 local function determineItem(array)
     memdomain.ram()
     currentItemsObtained = u8(itemsObtained)
-    
 end
 
 local function gotSword()
@@ -403,8 +404,8 @@ end
 
 local function StateOKForMainLoop()
     memDomain.ram()
-    local gameMode = u8(0x12) 
-    return gameMode == 5 
+    local gameMode = u8(0x12)
+    return gameMode == 5
 end
 
 local function checkCaveItemObtained()
@@ -448,6 +449,31 @@ function generateUnderworld79LocationChecked()
     data = uRange(0x077E, 0x81)
     data[0] = nil
     return data
+end
+
+function generateMajorCaveScreens()
+    if majorCaveScreens then
+        return majorCaveScreens
+    end
+
+    local data = uRange(0x18490, 0x7f)
+    local caveMask = 0xfc
+    local caveShift = 2
+    majorCaveScreens = {}
+
+    for screenId, byte in ipairs(data) do
+        local shiftedCaveId = bit.band(byte, caveMask)
+        local caveId = bit.rshift(shiftedCaveId, caveShift)
+        if caveId == 16 then  -- starting sword cave
+            majorCaveScreens["Starting Sword Cave"] = screenId
+        elseif caveId == 18 then  -- white sword cave
+            majorCaveScreens["White Sword Pond"] = screenId
+        elseif caveId == 19 then  -- magical sword grave
+            majorCaveScreens["Magical Sword Grave"] = screenId
+        elseif caveId == 24 then  -- letter cave
+            majorCaveScreens["Letter Cave"] = screenId
+        end
+    end
 end
 
 function updateTriforceFragments()
@@ -547,6 +573,7 @@ function receive()
     retTable["overworldHC"] = getHCLocation()
     retTable["overworldPB"] = getPBLocation()
     retTable["itemsObtained"] = u8(itemsObtained)
+    retTable["majorLocationOffsets"] = generateMajorCaveScreens()
     msg = json.encode(retTable).."\n"
     local ret, error = zeldaSocket:send(msg)
     if ret == nil then

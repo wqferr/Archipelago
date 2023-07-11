@@ -1,7 +1,8 @@
 import typing
 
-from .Locations import level_locations
-from .Names import RegionNames
+from .Locations import take_any_locations, arrow_shop_locations, candle_shop_locations, shield_shop_locations,\
+    blue_ring_shop_locations, potion_shop_locations
+from .Names import RegionNames, LocationNames
 from BaseClasses import Entrance, Region, Location, MultiWorld, CollectionState
 from enum import Enum
 from collections import namedtuple, defaultdict
@@ -16,7 +17,7 @@ class CaveRequirement(Enum):
 
 CaveMetadata = namedtuple(
     "CaveMetadata",
-    ["screen_code", "entrance_type", "location_name"],
+    ["screen_code", "entrance_type"],
     defaults=[CaveRequirement.NONE]
 )
 
@@ -31,6 +32,12 @@ class Cave(Region):
         super().__init__(name, player, world)
         self.metadata = metadata
         self.cave_code = cave_code
+
+    # call after locations get created to link them up
+    def connect_locations(self):
+        for location_name in self.metadata.location_names:
+            loc = self.multiworld.get_location(location_name)
+            self.locations.append(loc)
 
 # this file is based on DKC3's implementation
 
@@ -245,6 +252,10 @@ def create_regions(world: MultiWorld, player: int):
         "Exit Bombable Secret"
     )
 
+    armos_item = Region(RegionNames.ARMOS_KNIGHTS, player, world)
+    world.regions.append(armos_item)
+    _connect_unrestricted(overworld_mainland, armos_item, "Go to Armos item array", "Leave Armos item array")
+
     def new_cave(name, original_screen, cave_code, requirement=CaveRequirement.NONE):
         cave = Cave(name, player, world, cave_code, CaveMetadata(original_screen, requirement))
         world.regions.append(cave)
@@ -315,7 +326,7 @@ def create_regions(world: MultiWorld, player: int):
         new_cave(RegionNames.DM_MONEY_GAME_A, 0x10, 22),
         new_cave(RegionNames.DM_MONEY_GAME_B, 0x16, 22),
         new_cave(RegionNames.DM_SECRET_MEDIUM, 0x13, 33),
-        levels[9],      
+        levels[9],
 
         # Dead Woods
         new_cave(RegionNames.DW_SECRET_MEDIUM, 0x70, 33),
@@ -330,6 +341,7 @@ def create_regions(world: MultiWorld, player: int):
 
     raft_islands = [
         levels[4],
+        # take any is grouped with other take any items
     ]
 
     for region in raft_islands:
@@ -378,41 +390,41 @@ def create_regions(world: MultiWorld, player: int):
         region.requirement = CaveRequirement.BRACELET
 
     shield_shops_ = [
-        new_cave(RegionNames.LAKE_SHIELD_SHOP_A, 0x26, 31, CaveRequirement.BOMBS),
-        new_cave(RegionNames.LAKE_SHIELD_SHOP_B, 0x46, 31, CaveRequirement.CANDLE),
-        new_cave(RegionNames.DM_SHIELD_SHOP, 0x12, 31, CaveRequirement.BOMBS),
-        new_cave(RegionNames.FOREST_SHIELD_SHOP, 0x4d, 31, CaveRequirement.CANDLE),
+        new_cave(RegionNames.LAKE_SHIELD_SHOP_A, 0x26, 31, shield_shop_locations, CaveRequirement.BOMBS),
+        new_cave(RegionNames.LAKE_SHIELD_SHOP_B, 0x46, 31, shield_shop_locations, CaveRequirement.CANDLE),
+        new_cave(RegionNames.DM_SHIELD_SHOP, 0x12, 31, shield_shop_locations, CaveRequirement.BOMBS),
+        new_cave(RegionNames.FOREST_SHIELD_SHOP, 0x4d, 31, shield_shop_locations, CaveRequirement.CANDLE),
     ]
 
     for shop in shield_shops_:
         _connect_unrestricted(shield_shops, shop, f"{shield_shops.name} -> {shop.name}")
 
     arrow_shops_ = [
-        new_cave(RegionNames.COAST_ARROW_SHOP, 0x6f, 29, CaveRequirement.NONE),
-        new_cave(RegionNames.GRAVEYARD_ARROW_SHOP, 0x25, 29, CaveRequirement.NONE),
-        new_cave(RegionNames.DESERT_ARROW_SHOP, 0x4a, 29, CaveRequirement.NONE),
-        new_cave(RegionNames.LAKE_ARROW_SHOP, 0x44, 29, CaveRequirement.NONE),
+        new_cave(RegionNames.COAST_ARROW_SHOP, 0x6f, 29, arrow_shop_locations, CaveRequirement.NONE),
+        new_cave(RegionNames.GRAVEYARD_ARROW_SHOP, 0x25, 29, arrow_shop_locations, CaveRequirement.NONE),
+        new_cave(RegionNames.DESERT_ARROW_SHOP, 0x4a, 29, arrow_shop_locations, CaveRequirement.NONE),
+        new_cave(RegionNames.LAKE_ARROW_SHOP, 0x44, 29, arrow_shop_locations, CaveRequirement.NONE),
     ]
 
     for shop in arrow_shops_:
         _connect_unrestricted(arrow_shops, shop, f"{arrow_shops.name} -> {shop.name}")
 
     candle_shops_ = [
-        new_cave(RegionNames.LH_CANDLE_SHOP, 0x0c, 30, CaveRequirement.NONE),
-        new_cave(RegionNames.START_CANDLE_SHOP, 0x66, 30, CaveRequirement.NONE),
-        new_cave(RegionNames.FOREST_CANDLE_SHOP, 0x5e, 30, CaveRequirement.NONE),
+        new_cave(RegionNames.LH_CANDLE_SHOP, 0x0c, 30, candle_shop_locations, CaveRequirement.NONE),
+        new_cave(RegionNames.START_CANDLE_SHOP, 0x66, 30, candle_shop_locations, CaveRequirement.NONE),
+        new_cave(RegionNames.FOREST_CANDLE_SHOP, 0x5e, 30, candle_shop_locations, CaveRequirement.NONE),
     ]
 
     for shop in candle_shops_:
         _connect_unrestricted(candle_shops, shop, f"{candle_shops.name} -> {shop.name}")
 
     medicine_shops_ = [
-        new_cave(RegionNames.LH_MEDICINE_SHOP, 0x0d, 26, CaveRequirement.BOMBS),
-        new_cave(RegionNames.DM_MEDICINE_SHOP, 0x04, 26, CaveRequirement.NONE),
-        new_cave(RegionNames.START_MEDICINE_SHOP, 0x78, 26, CaveRequirement.CANDLE),
-        new_cave(RegionNames.RIVER_MEDICINE_SHOP, 0x27, 26, CaveRequirement.BOMBS),
-        new_cave(RegionNames.GRAVEYARD_MEDICINE_SHOP, 0x33, 26, CaveRequirement.BOMBS),
-        new_cave(RegionNames.DESERT_MEDICINE_SHOP, 0x46, 26, CaveRequirement.CANDLE),
+        new_cave(RegionNames.LH_MEDICINE_SHOP, 0x0d, 26, potion_shop_locations, CaveRequirement.BOMBS),
+        new_cave(RegionNames.DM_MEDICINE_SHOP, 0x04, 26, potion_shop_locations, CaveRequirement.NONE),
+        new_cave(RegionNames.START_MEDICINE_SHOP, 0x78, 26, potion_shop_locations, CaveRequirement.CANDLE),
+        new_cave(RegionNames.RIVER_MEDICINE_SHOP, 0x27, 26, potion_shop_locations, CaveRequirement.BOMBS),
+        new_cave(RegionNames.GRAVEYARD_MEDICINE_SHOP, 0x33, 26, potion_shop_locations, CaveRequirement.BOMBS),
+        new_cave(RegionNames.DESERT_MEDICINE_SHOP, 0x46, 26, potion_shop_locations, CaveRequirement.CANDLE),
     ]
 
     for shop in medicine_shops_:
@@ -423,10 +435,10 @@ def create_regions(world: MultiWorld, player: int):
     _connect_unrestricted(blue_ring_shop, brs, f"{blue_ring_shop.name} -> {brs.name}")
 
     take_anys_ = [
-        new_cave(RegionNames.LAKE_TAKE_ANY, 0x47, 17, CaveRequirement.CANDLE),
-        new_cave(RegionNames.COAST_TAKE_ANY_A, 0x7b, 17, CaveRequirement.BOMBS),
-        new_cave(RegionNames.COAST_TAKE_ANY_B, 0x2f, 17, CaveRequirement.RAFT),
-        new_cave(RegionNames.DESERT_TAKE_ANY, 0x2c, 17, CaveRequirement.BOMBS),
+        new_cave(RegionNames.LAKE_TAKE_ANY, 0x47, 17, take_any_locations, CaveRequirement.CANDLE),
+        new_cave(RegionNames.COAST_TAKE_ANY_A, 0x7b, 17, take_any_locations, CaveRequirement.BOMBS),
+        new_cave(RegionNames.COAST_TAKE_ANY_B, 0x2f, 17, take_any_locations, CaveRequirement.RAFT),
+        new_cave(RegionNames.DESERT_TAKE_ANY, 0x2c, 17, take_any_locations, CaveRequirement.BOMBS),
     ]
 
     for t_a in take_anys_:
@@ -447,8 +459,6 @@ def create_regions(world: MultiWorld, player: int):
     #     *blue_ring_shop_,
     #     *take_anys,
     # ]
-
-    # world.regions += all_caves
 
 
 def connect_regions(world: MultiWorld, player: int):
