@@ -456,6 +456,7 @@ function generateMajorCaveScreens()
         return majorCaveScreens
     end
 
+    memDomain.rom()
     local data = uRange(0x18490, 0x7f)
     local caveMask = 0xfc
     local caveShift = 2
