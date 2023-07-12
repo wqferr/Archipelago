@@ -270,6 +270,7 @@ async def _open_nes_streams(ctx: ZeldaContext):
         return False
 
 def _sync_major_location_offsets(romMajorLocationOffsets: typing.Dict[str, int]):
+    global _synced_major_location_offsets
     if _synced_major_location_offsets:
         return
     for location_name, screen_id in romMajorLocationOffsets.items():
