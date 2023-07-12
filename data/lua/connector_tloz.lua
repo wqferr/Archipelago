@@ -409,7 +409,7 @@ local function StateOKForMainLoop()
 end
 
 local function checkCaveItemObtained()
-    memDomain.ram() 
+    memDomain.ram()
     local returnTable = {}
     returnTable["slot1"] = u8(shopSlotLeft)
     returnTable["slot2"] = u8(shopSlotMiddle)
@@ -576,6 +576,7 @@ function receive()
     retTable["itemsObtained"] = u8(itemsObtained)
     retTable["majorLocationOffsets"] = generateMajorCaveScreens()
     msg = json.encode(retTable).."\n"
+    print(msg)
     local ret, error = zeldaSocket:send(msg)
     if ret == nil then
         print(error)
