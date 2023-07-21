@@ -19,6 +19,7 @@ from CommonClient import CommonContext, server_loop, gui_enabled, console_loop, 
 
 from worlds.tloz.Items import item_game_ids
 from worlds.tloz.Locations import location_ids, major_location_offsets
+from worlds.tloz.Names import LocationNames
 from worlds.tloz import Items, Locations, Rom
 
 SYSTEM_MESSAGE_ID = 0
@@ -105,7 +106,7 @@ class ZeldaContext(CommonContext):
         else:
             text = self.jsontotextparser(copy.deepcopy(args["data"]))
             logger.info(text)
-        relevant = args.get("type", None) in {"Hint", "ItemSend"}
+        relevant = args.get("type", None) in ["Hint", "ItemSend"]
         if relevant:
             item = args["item"]
             # goes to this world
@@ -184,7 +185,6 @@ def get_shop_bit_from_name(location_name):
 
 
 async def parse_locations(locations_array, ctx: ZeldaContext, force: bool, zone="None"):
-    # print("PARSE!", [lookup_any_location_id_to_name[l] for l in locations_array])
     if locations_array == ctx.locations_array and not force:
         return
     ctx.locations_array = locations_array
@@ -192,13 +192,12 @@ async def parse_locations(locations_array, ctx: ZeldaContext, force: bool, zone=
     location = None
     for location in ctx.missing_locations:
         location_name = lookup_any_location_id_to_name[location]
-        print("Location:", location, location_name)
 
         if location_name in Locations.overworld_locations and zone == "overworld":
             status = locations_array[Locations.major_location_offsets[location_name]]
-            if location_name == "Ocean Heart Container":
+            if location_name == LocationNames.OCEAN_HEART_CONTAINER:
                 status = locations_array[ctx.overworld_item]
-            if location_name == "Armos Knights":
+            if location_name == LocationNames.ARMOS_KNIGHTS:
                 status = locations_array[ctx.armos_item]
             if status & 0x10:
                 ctx.locations_checked.add(location)
@@ -214,9 +213,7 @@ async def parse_locations(locations_array, ctx: ZeldaContext, force: bool, zone=
                 ctx.locations_checked.add(location)
                 locations_checked.append(location)
         elif (location_name in Locations.shop_slots or "Take" in location_name) and zone == "caves":
-            print("SYNC!")
             shop_bit = get_shop_bit_from_name(location_name)
-            print("shop bit: ", hex(shop_bit))
             slot = 0
             context_slot = 0
             if "Left" in location_name:
@@ -228,7 +225,6 @@ async def parse_locations(locations_array, ctx: ZeldaContext, force: bool, zone=
             elif "Right" in location_name:
                 slot = "slot3"
                 context_slot = 2
-            print("ctx slot: ", context_slot)
             if locations_array[slot] & shop_bit > 0:
                 locations_checked.append(location)
                 ctx.shop_slots[context_slot] |= shop_bit
@@ -281,15 +277,12 @@ async def nes_sync_task(ctx: ZeldaContext):
     logger.info("Starting nes connector. Use /nes for status information")
     while not ctx.exit_event.is_set():
         error_status = None
-        print("LOOP")
         if not await _open_nes_streams(ctx):
-            print("Nes streams fucked up")
             continue
         (reader, writer) = ctx.nes_streams
         msg = get_payload(ctx).encode()
         writer.write(msg)
         writer.write(b'\n')
-        print("wrote!")
         try:
             await asyncio.wait_for(writer.drain(), timeout=1.5)
             try:
@@ -298,7 +291,6 @@ async def nes_sync_task(ctx: ZeldaContext):
                 # 2. An array representing the memory values of the locations area (if in game)
                 data = await asyncio.wait_for(reader.readline(), timeout=5)
                 data_decoded = json.loads(data.decode())
-                print('DATA:', data_decoded)
                 if data_decoded.get("majorLocationOffsets") is not None:
                     _sync_major_location_offsets(data_decoded["majorLocationOffsets"])
                 if data_decoded.get("overworldHC") is not None:
@@ -320,7 +312,6 @@ async def nes_sync_task(ctx: ZeldaContext):
                     if 'underworld2' in data_decoded:
                         asyncio.create_task(parse_locations(data_decoded['underworld2'], ctx, False, "underworld2"))
                     if 'caves' in data_decoded:
-                        print("DOIN' IT!")
                         asyncio.create_task(parse_locations(data_decoded['caves'], ctx, False, "caves"))
                 if not ctx.auth:
                     ctx.auth = ''.join([chr(i) for i in data_decoded['playerName'] if i != 0])
@@ -359,7 +350,6 @@ async def nes_sync_task(ctx: ZeldaContext):
         elif error_status:
             ctx.nes_status = error_status
             logger.info("Lost connection to nes and attempting to reconnect. Use /nes for status updates")
-    print("OUT OF THE LOOP")
 
 
 if __name__ == '__main__':

@@ -576,7 +576,6 @@ function receive()
     retTable["itemsObtained"] = u8(itemsObtained)
     retTable["majorLocationOffsets"] = generateMajorCaveScreens()
     msg = json.encode(retTable).."\n"
-    print(msg)
     local ret, error = zeldaSocket:send(msg)
     if ret == nil then
         print(error)
